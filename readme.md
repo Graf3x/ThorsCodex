@@ -10,7 +10,7 @@ Thor's Codex is a project that aims to index all of Pirate Software's available 
 
 ## Features
 
-- Indexes YouTube VODs and Discord channel content.
+- Indexes YouTube VODs and Discord channel content (only the tts section).
 - Provides a search engine to find specific words said during VODs.
 - Hosts HTML and JavaScript to interact with the application.
 
