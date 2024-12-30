@@ -14,6 +14,17 @@ Thor's Codex is a project that aims to index all of Pirate Software's available 
 - Provides a search engine to find specific words said during VODs.
 - This is just the static files to host the HTML and JavaScript to interact with the application.
 
+## Architecture
+
+This system uses a combination of:
+- **Static HTML/JS pages** to provide the user interface.
+- **YouTube downloading** (e.g., youtube-dl) to gather transcript text.
+- **Serverless functions** to route requests and scale based on traffic load. These functions handle:
+  - **Advanced Experience**: Uses RAG and LLM to return responses.
+  - **Prime Experience**: Uses cognitive services or similar tools for searches.
+  - **First Experience**: Uses a normal DB search as an initial, simple fallback.
+  - **Fallback Experience**: Currently to be determined, possibly a YouTube search.
+
 ## Getting Started
 
 To get started with Thor's Codex, follow these steps:
