@@ -6,7 +6,7 @@
   <script>
     async function searchTranscripts() {
       const query = document.getElementById('searchInput').value;
-      const response = await fetch(`https://<your-function-app-name>.azurewebsites.net/api/SearchAllFather?like=${query}`);
+      const response = await fetch(`https://allfathersearch-a6cfbvb0f9c3apf6.westus-01.azurewebsites.net/api/SearchAllFather?like=${query}`);
       const data = await response.json();
       const resultsContainer = document.getElementById('results');
       resultsContainer.innerHTML = '';
