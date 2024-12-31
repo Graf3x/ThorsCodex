@@ -17,8 +17,8 @@ Thor's Codex is a project that aims to index all of Pirate Software's available 
 ## Architecture
 
 This system uses a combination of:
-- **Static HTML/JS pages** to provide the user interface.
-- **YouTube downloading** (e.g., youtube-dl) to gather transcript text.
+- **Static HTML/JS pages** : This repo,  to provide the user interface.
+- **[ThorsCodex.Transcripts.to.CSV](https://github.com/Graf3x/ThorsCodex.Transcripts.to.CSV)** : Quick app to gather transcript text.
 - **Serverless functions** to route requests and scale based on traffic load. These functions handle:
   - **Advanced Experience**: Uses RAG and LLM to return responses.
   - **Prime Experience**: Uses cognitive services or similar tools for searches.
