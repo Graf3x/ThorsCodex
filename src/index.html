@@ -29,8 +29,15 @@
     </button>
     <div id="spinner" class="spinner mt-4"></div>
     <div id="results" class="w-1/2 mt-8"></div>
+    <div id="pagination" class="flex gap-4 items-center mt-4">
+      <button id="prevPage" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Previous</button>
+      <span id="pageInfo" class="text-white">Page 1 of 1</span>
+      <button id="nextPage" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Next</button>
+    </div>
   </main>
   <script>
+     let currentPage = 1;
+     const pageSize = 100;
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
     const spinner = document.getElementById('spinner');
@@ -52,9 +59,14 @@
       resultsContainer.innerHTML = '';
 
       try {
-        const response = await fetch('https://odin.thorscodex.com/api/SearchAllFather?like=' + encodeURIComponent(searchInput.value));
+        const response = await fetch(`https://odin.thorscodex.com/api/SearchAllFather?like=${encodeURIComponent(searchInput.value)}&page=${page}&pageSize=${pageSize}`);
         const data = await response.json();
         
+        currentPage = data.page;
+        document.getElementById('pageInfo').textContent = `Page ${data.page} of ${data.totalPages}`;
+        document.getElementById('prevPage').disabled = currentPage <= 1;
+        document.getElementById('nextPage').disabled = currentPage >= data.totalPages;
+
         // Group results by streamDate
         const groupedResults = data.results.reduce((groups, result) => {
           const date = new Date(result.streamDate).toLocaleDateString();
@@ -107,6 +119,14 @@
         spinner.style.display = 'none';
       }
     }
+    
+    document.getElementById('prevPage').addEventListener('click', () => {
+      if (currentPage > 1) searchTranscripts(currentPage - 1);
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+      searchTranscripts(currentPage + 1);
+    });
 
     function formatTimestamp(seconds) {
       const minutes = Math.floor(seconds / 60);
@@ -114,6 +134,8 @@
       return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
   </script>
+  <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="joshp" data-color="#601e62" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>
+  
 </body>
 
 </html>
