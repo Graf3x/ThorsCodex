@@ -17,19 +17,27 @@
         const resultsContainer = document.getElementById('results');
         resultsContainer.innerHTML = '';
 
-        if (data.Results && data.Results.length > 0) {
-            data.Results.forEach(result => {
+        // Check for either Results or results
+        const searchResults = data.Results || data.results;
+
+        if (searchResults && searchResults.length > 0) {
+            searchResults.forEach(result => {
+                // Format timestamp for display
+                const timestamp = result.timestamp ? result.timestamp.split('.')[0] : '00:00:00';
+                
                 const resultElement = document.createElement('div');
                 resultElement.className = 'p-4 mb-4 bg-white rounded-lg shadow-md';
                 resultElement.innerHTML = `
-                    <h2 class="text-2xl font-bold">${result.VideoTitle || 'Untitled'}</h2>
-                    <p class="my-2">${result.Text || 'No text available'}</p>
+                    <h2 class="text-2xl font-bold mb-2">${result.videoTitle || 'Untitled'}</h2>
+                    <p class="text-gray-700 mb-2">${result.text || 'No text available'}</p>
+                    <div class="flex justify-between items-center text-sm text-gray-600">
+                        <span>Stream Date: ${new Date(result.streamDate).toLocaleDateString()}</span>
+                        <span>Timestamp: ${timestamp}</span>
+                    </div>
                     <div class="mt-2">
-                        <span class="text-gray-600">Stream Date: ${result.StreamDate || 'Unknown'}</span>
-                        <a href="${result.VideoUrlWithTimestamp || '#'}" 
-                           class="ml-4 text-blue-500 hover:text-blue-700"
-                           target="_blank"
-                           ${!result.VideoUrlWithTimestamp ? 'style="display:none"' : ''}>
+                        <a href="${result.videoUrl}${result.timestampSeconds ? '?t=' + result.timestampSeconds : ''}" 
+                           class="text-blue-500 hover:text-blue-700"
+                           target="_blank">
                             Watch Video
                         </a>
                     </div>
@@ -37,14 +45,15 @@
                 resultsContainer.appendChild(resultElement);
             });
         } else {
-            resultsContainer.innerHTML = '<p class="text-white">No results found</p>';
+            resultsContainer.innerHTML = '<p class="text-white text-center">No results found</p>';
         }
     } catch (error) {
         console.error('Error:', error);
         const resultsContainer = document.getElementById('results');
-        resultsContainer.innerHTML = '<p class="text-white">An error occurred while searching</p>';
+        resultsContainer.innerHTML = '<p class="text-white text-center">An error occurred while searching</p>';
     }
 }
+
 
   </script>
 </head>
