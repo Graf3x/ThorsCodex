@@ -21,7 +21,9 @@
 </head>
 
 <body class="flex flex-col min-h-screen" style="background-color: #082c41;">
-  <main class="flex-grow flex flex-col items-center w-full">
+  <main class="flex-grow flex flex-col items-center justify-center w-full">
+    <div class="flex flex-col items-center w-full gap-4">
+     
     <h1 class="text-5xl text-white mb-8">Thor's Codex</h1>
     <input type="text" id="searchInput" class="w-1/2 p-4 text-xl rounded-lg mb-4" placeholder="Search..." />
     <button id="searchButton" onclick="searchTranscripts()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
@@ -34,7 +36,8 @@
       <span id="pageInfo" class="text-white">Page 1 of 1</span>
       <button id="nextPage" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Next</button>
     </div>
-  </main>
+  </div>
+</main>
   <script>
      let currentPage = 1;
      const pageSize = 100;
@@ -148,7 +151,7 @@
         </svg>
         <span>View on GitHub</span>
       </a>
-      <div id="bmc-container">
+      <div style="transform: scale(0.75); transform-origin: center;">
         <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="joshp" data-color="#601e62" data-emoji="" data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#FFDD00"></script>
       </div>
     </div>
