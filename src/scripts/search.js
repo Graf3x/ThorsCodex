@@ -75,7 +75,10 @@ export function setupSearch(config) {
         nextPage.disabled = currentPage >= data.totalPages;
       }
 
-      // Group results by streamDate
+
+      resultsContainer.innerHTML = '';
+      resultsContainer.appendChild(createInfoTooltip());
+
       const groupedResults = data.results.reduce((groups, item) => {
         const date = new Date(item.streamDate).toLocaleDateString();
         if (!groups[date]) {
@@ -140,5 +143,26 @@ export function setupSearch(config) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Creates an info tooltip element.
+   * @returns {HTMLElement} The tooltip element
+   */
+  function createInfoTooltip() {
+    const tooltipDiv = document.createElement('div');
+    tooltipDiv.className = 'absolute -top-6 right-0 text-white flex items-center gap-1';
+    tooltipDiv.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+      </svg>
+      <span class="group relative">
+        Info
+        <span class="invisible group-hover:visible absolute left-0 top-6 w-48 p-2 bg-gray-800 text-sm rounded-lg">
+          Results are grouped by stream, showing 100 mentions per page
+        </span>
+      </span>
+    `;
+    return tooltipDiv;
   }
 }
