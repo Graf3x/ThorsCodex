@@ -22,7 +22,8 @@ This system uses a combination of:
 - **Serverless functions** to route requests and scale based on traffic load. These functions handle:
   - **Advanced Experience**: Uses RAG and LLM to return responses.
   - **Prime Experience**: Uses cognitive services or similar tools for searches.
-  - **First Experience**: Uses a normal DB search as an initial, simple fallback.
+  - **First Experience**: Uses a normal DB search as an initial, simple fallback. The first experence is currently Cosmos and an azure function. It is apparent to me right now that i will need to shape the data differently for each experence. Right now i am tryign to roughly follow SWITCHBOARD Corpus Guidelines for proccessing the data. There are a few other standards out there right now, but this seemed to be the most straight forward. 
+  
   - **Fallback Experience**: Currently to be determined, possibly a YouTube search.
 
 ## Getting Started
