@@ -1,6 +1,7 @@
 body {
   background-color: #082c41;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  overflow-x: hidden; /* Add this */
 }
 .bg-clip-text {
   -webkit-background-clip: text;
@@ -38,4 +39,15 @@ body {
   50% {
     transform: rotateY(180deg);
   }
+}
+
+/* Add these new rules */
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+svg {
+  max-width: 100%;
+  height: auto;
 }

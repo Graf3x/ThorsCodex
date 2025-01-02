@@ -52,16 +52,19 @@
   </div>
 </main>
   
-<footer class="w-full bg-gray-800 mt-auto py-6 sm:py-0" data-version="1.0.0">
-  <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-center items-center">
-    <span class="text-white flex items-center gap-1">Made with 
-      <span class="inline-block">
-        <span class="bg-gradient-to-r from-yellow-500 to-purple-900 bg-clip-text text-transparent">❤</span>
-      </span> 
-      by Graf3X</span>
-      </div>
-  <div class="container mx-auto px-4 flex flex-col md:flex-row justify-center items-center gap-6">
-   <a href="https://github.com/Graf3x/ThorsCodex" 
+<footer class="w-full bg-gray-800 mt-auto py-6 sm:py-0 overflow-hidden" data-version="1.0.0">
+  <div class="container mx-auto px-4 max-w-full">
+    <div class="py-4 flex flex-col md:flex-row justify-center items-center">
+      <span class="text-white flex items-center gap-1">
+        Made with 
+        <span class="inline-block">
+          <span class="bg-gradient-to-r from-yellow-500 to-purple-900 bg-clip-text text-transparent">❤</span>
+        </span> 
+        by Graf3X
+      </span>
+    </div>
+    <div class="flex flex-col md:flex-row justify-center items-center gap-6 pb-4">
+      <a href="https://github.com/Graf3x/ThorsCodex" 
          target="_blank"
          class="text-white hover:text-gray-300 flex items-center gap-2">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -77,7 +80,8 @@
            data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#601e62"></script>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
   <script type="module">
     import { setupSearch } from './scripts/search.js';
 
