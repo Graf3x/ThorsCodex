@@ -1,5 +1,6 @@
 const pageSize = 100;
 let currentPage = 1;
+let currentContinuationToken = null;
 
 /**
  * Initializes the search functionality.
@@ -45,25 +46,36 @@ export function setupSearch(config) {
 
   /**
    * Performs the actual search and updates UI elements.
-   * @param {number} page - Page number to query
+   * @param {boolean} isNewSearch - Whether this is a new search or loading more results
    */
-  async function searchTranscripts(page = 1) {
+  async function searchTranscripts(isNewSearch = true) {
     searchInput.disabled = true;
     searchButton.disabled = true;
     searchButton.innerText = 'Searching...';
     spinner.style.display = 'block';
-    resultsContainer.innerHTML = '';
+
+    if (isNewSearch) {
+      resultsContainer.innerHTML = '';
+      currentContinuationToken = null;
+    }
 
     try {
-      const response = await fetch(
-        `https://odin.thorscodex.com/api/SearchAllFather?like=${encodeURIComponent(
-          searchInput.value
-        )}&page=${page}&pageSize=${pageSize}`
-      );
+      let url = `https://odin.thorscodex.com/api/SearchAllFatherFullText?query=${encodeURIComponent(
+        searchInput.value
+      )}&pageSize=${pageSize}`;
+
+      if (!isNewSearch && currentContinuationToken) {
+        url += `&continuationToken=${encodeURIComponent(currentContinuationToken)}`;
+      }
+
+      const response = await fetch(url);
       const data = await response.json();
 
-      // Show/hide pagination based on results
-      paginationDiv.classList.toggle('hidden', data.totalPages <= 1);
+      // Store the continuation token for next page
+      currentContinuationToken = data.ContinuationToken;
+
+      // Show/hide pagination based on continuation token
+      paginationDiv.classList.toggle('hidden', !currentContinuationToken);
 
       if (data.totalPages > 1) {
         currentPage = data.page;
