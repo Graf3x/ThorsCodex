@@ -13,9 +13,6 @@ export function setupSearch(config) {
     spinnerId,
     resultsId,
     paginationId,
-    prevPageId,
-    nextPageId,
-    pageInfoId,
   } = config;
 
   const searchInput = document.getElementById(inputId);
