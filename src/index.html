@@ -3,6 +3,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thor's Codex</title>
   <link href="https://fonts.googleapis.com/css?family=Cookie&amp;display=swap" rel="stylesheet">
+  
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="./styles/main.css">
 </head>
@@ -16,7 +17,20 @@
     <button id="searchButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
       Search
     </button>
-    <div id="spinner" class="spinner mt-4"></div>
+    <div id="spinner" class="spinner">
+      <svg viewBox="0 0 64 64" class="pixel-book-spinner">
+        <!-- Back cover -->
+        <rect x="2" y="2" width="20" height="60" fill="#c22929" />
+        <!-- Pages -->
+        <rect x="21" y="2" width="22" height="60" fill="#f3f3f3" class="pages" />
+        <!-- Front cover -->
+        <rect x="42" y="2" width="20" height="60" fill="#c22929" />
+        <!-- D&D text (stylized, big block) -->
+        <text x="6" y="38" fill="#fff" style="font-size:8px;font-family:monospace;">
+          D&D
+        </text>
+      </svg>
+    </div>
     <div id="results" class="w-full sm:w-2/3 md:w-1/2 mt-8">
       <div class="absolute -top-6 right-0 text-white flex items-center gap-1">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
