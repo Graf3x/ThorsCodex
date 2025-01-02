@@ -51,3 +51,26 @@ svg {
   max-width: 100%;
   height: auto;
 }
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 10;
+  max-width: calc(100vw - 2rem);
+  width: max-content;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .tooltip {
+    width: calc(100vw - 2rem);
+    left: -100%;
+  }
+}
