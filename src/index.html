@@ -1,48 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thor's Codex</title>
+  <link href="https://fonts.googleapis.com/css?family=Cookie&amp;display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="./styles/main.css">
 </head>
 
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen" style="background-color: #082c41;">
   <main class="flex-grow flex flex-col items-center justify-center w-full">
     <div class="flex flex-col items-center w-full gap-4">
-      <h1 class="text-5xl text-white mb-8">Thor's Codex</h1>
-      <input type="text" id="searchInput" class="w-1/2 p-4 text-xl rounded-lg mb-4" placeholder="Search..." />
-      <button id="searchButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
-        Search
-      </button>
-      <div id="spinner" class="spinner mt-4"></div>
-      <div id="results" class="w-1/2 mt-8"></div>
-      <div id="pagination" class="hidden flex gap-4 items-center py-6">
-        <button id="prevPage" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Previous</button>
-        <span id="pageInfo" class="text-white">Page 1 of 1</span>
-        <button id="nextPage" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Next</button>
+     
+    <h1 class="text-5xl text-white mb-8">Thor's Codex</h1>
+    <input type="text" id="searchInput" class="w-1/2 p-4 text-xl rounded-lg mb-4" placeholder="Search..." />
+    <button id="searchButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
+      Search
+    </button>
+    <div id="spinner" class="spinner mt-4"></div>
+    <div id="results" class="w-1/2 mt-8"></div>
+    <div id="pagination" class="hidden flex gap-4 items-center py-6">
+      <button id="prevPage" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Previous</button>
+      <span id="pageInfo" class="text-white">Page 1 of 1</span>
+      <button id="nextPage" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Next</button>
+    </div>
+  </div>
+</main>
+  
+<footer class="w-full bg-gray-800 mt-auto">
+  <div class="container mx-auto px-4 flex flex-col md:flex-row justify-center items-center gap-6">
+   <a href="https://github.com/Graf3x/ThorsCodex" 
+         target="_blank"
+         class="text-white hover:text-gray-300 flex items-center gap-2">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        <span>View on GitHub</span>
+      </a>
+      <div>
+        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" 
+        data-name="bmc-button" data-slug="joshp" data-color="rgb(31, 41, 55)"
+         data-emoji="" data-font="Cookie" data-text="Buy me a coffee"
+           data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#601e62"></script>
       </div>
     </div>
-  </main>
-  <footer class="w-full bg-gray-800 mt-auto">
-    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-center items-center gap-6">
-     <a href="https://github.com/Graf3x/ThorsCodex" 
-           target="_blank"
-           class="text-white hover:text-gray-300 flex items-center gap-2">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          <span>View on GitHub</span>
-        </a>
-        <div>
-          <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" 
-          data-name="bmc-button" data-slug="joshp" data-color="rgb(31, 41, 55)"
-           data-emoji="" data-font="Cookie" data-text="Buy me a coffee"
-             data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#601e62"></script>
-        </div>
-      </div>
   </footer>
-  <script type="module" src="./scripts/search.js"></script>
+  <script type="module">
+    import { setupSearch } from './scripts/search.js';
+
+    setupSearch({
+      inputId: 'searchInput',
+      buttonId: 'searchButton',
+      spinnerId: 'spinner',
+      resultsId: 'results',
+      paginationId: 'pagination',
+      prevPageId: 'prevPage',
+      nextPageId: 'nextPage',
+      pageInfoId: 'pageInfo',
+    });
+  </script>
 </body>
 </html>
