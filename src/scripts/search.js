@@ -1,5 +1,6 @@
 const pageSize = 100;
 let currentPage = 1;
+let currentContinuationToken = null;
 
 /**
  * Initializes the search functionality.
@@ -55,21 +56,33 @@ export function setupSearch(config) {
     resultsContainer.innerHTML = '';
 
     try {
-      const response = await fetch(
-        `https://odin.thorscodex.com/api/SearchAllFather?like=${encodeURIComponent(
-          searchInput.value
-        )}&page=${page}&pageSize=${pageSize}`
-      );
+      let url = `https://odin.thorscodex.com/api/SearchAllFatherFullText?query=${encodeURIComponent(
+        searchInput.value
+      )}&pageSize=${pageSize}`;
+      
+      if (page > 1 && currentContinuationToken) {
+        url += `&continuationToken=${encodeURIComponent(currentContinuationToken)}`;
+      }
+    
+      const response = await fetch(url);
       const data = await response.json();
-
-      // Show/hide pagination based on results
-      paginationDiv.classList.toggle('hidden', data.totalPages <= 1);
-
-      if (data.totalPages > 1) {
-        currentPage = data.page;
-        pageInfo.textContent = `Page ${data.page} of ${data.totalPages}`;
+    
+      // Store continuation token for next page
+      currentContinuationToken = data.continuationToken;
+    
+      // Show/hide pagination based on continuation token
+      paginationDiv.classList.toggle('hidden', !data.continuationToken);
+    
+      if (data.continuationToken) {
+        currentPage = page;
+        pageInfo.textContent = `Page ${currentPage}`; // Simple page counter
         prevPage.disabled = currentPage <= 1;
-        nextPage.disabled = currentPage >= data.totalPages;
+        nextPage.disabled = !data.continuationToken;
+      }
+    
+      // Reset token when starting new search
+      if (page === 1) {
+        currentContinuationToken = null;
       }
 
       resultsContainer.innerHTML = '';
