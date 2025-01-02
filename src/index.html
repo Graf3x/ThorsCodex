@@ -57,108 +57,19 @@
       </div>
     </div>
   </footer>
-  <script>
-    let currentPage = 1;
-    const pageSize = 100;
-   const searchInput = document.getElementById('searchInput');
-   const searchButton = document.getElementById('searchButton');
-   const spinner = document.getElementById('spinner');
+  <script type="module">
+    import { setupSearch } from './scripts/search.js';
 
-   searchInput.addEventListener('keypress', function(e) {
-     if (e.key === 'Enter') {
-       searchTranscripts();
-     }
-   });
-
-   async function searchTranscripts(page = 1) {
-     const resultsContainer = document.getElementById('results');
-     const paginationDiv = document.getElementById('pagination');
-     // Disable controls
-     searchInput.disabled = true;
-     searchButton.disabled = true;
-     searchButton.innerText = 'Searching...';
-     spinner.style.display = 'block';
-     resultsContainer.innerHTML = '';
-
-     try {
-         const response = await fetch(`https://odin.thorscodex.com/api/SearchAllFather?like=${encodeURIComponent(searchInput.value)}&page=${page}&pageSize=${pageSize}`);
-         const data = await response.json();
-         
-         // Show/hide pagination based on results
-         paginationDiv.classList.toggle('hidden', data.totalPages <= 1);
-         
-         if (data.totalPages > 1) {
-           currentPage = data.page;
-           document.getElementById('pageInfo').textContent = `Page ${data.page} of ${data.totalPages}`;
-           document.getElementById('prevPage').disabled = currentPage <= 1;
-           document.getElementById('nextPage').disabled = currentPage >= data.totalPages;
-         }
-       // Group results by streamDate
-       const groupedResults = data.results.reduce((groups, result) => {
-         const date = new Date(result.streamDate).toLocaleDateString();
-         if (!groups[date]) groups[date] = [];
-         groups[date].push(result);
-         return groups;
-       }, {});
-
-       // Create elements for each group
-       Object.entries(groupedResults).forEach(([date, results]) => {
-         const videoId = results[0].videoUrl.split('v=')[1];
-         const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-         
-         const groupElement = document.createElement('div');
-         groupElement.classList.add('bg-white', 'rounded-lg', 'p-4', 'my-4', 'shadow-lg');
-         
-         groupElement.innerHTML = `
-           <div class="cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-             <div class="flex flex-col md:flex-row items-center gap-4">
-               <img src="${thumbnailUrl}" alt="Video thumbnail" class="w-full md:w-32 rounded-lg">
-               <div class="text-center md:text-left">
-                 <h3 class="text-lg font-semibold">${results[0].videoTitle || 'Untitled Stream'}</h3>
-                 <p class="text-gray-500">${date} - ${results.length} mentions</p>
-               </div>
-             </div>
-           </div>
-           <div class="hidden mt-4 pl-4 border-l-2 border-gray-200">
-             ${results.map(result => `
-               <div class="py-2">
-                 <p class="text-gray-600">${result.text}</p>
-                 <a href="${result.videoUrl}&t=${result.timestampSeconds}" 
-                    target="_blank"
-                    class="text-sm text-blue-500 hover:text-blue-700">
-                   Watch at ${formatTimestamp(result.timestampSeconds)}
-                 </a>
-               </div>
-             `).join('')}
-           </div>
-         `;
-         
-         resultsContainer.appendChild(groupElement);
-       });
-     } catch (err) {
-       console.error(err);
-     } finally {
-       // Re-enable controls
-       searchInput.disabled = false;
-       searchButton.disabled = false;
-       searchButton.innerText = 'Search';
-       spinner.style.display = 'none';
-     }
-   }
-   
-   document.getElementById('prevPage').addEventListener('click', () => {
-     if (currentPage > 1) searchTranscripts(currentPage - 1);
-   });
-
-   document.getElementById('nextPage').addEventListener('click', () => {
-     searchTranscripts(currentPage + 1);
-   });
-
-   function formatTimestamp(seconds) {
-     const minutes = Math.floor(seconds / 60);
-     const remainingSeconds = seconds % 60;
-     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-   }
- </script>
+    setupSearch({
+      inputId: 'searchInput',
+      buttonId: 'searchButton',
+      spinnerId: 'spinner',
+      resultsId: 'results',
+      paginationId: 'pagination',
+      prevPageId: 'prevPage',
+      nextPageId: 'nextPage',
+      pageInfoId: 'pageInfo',
+    });
+  </script>
 </body>
 </html>
