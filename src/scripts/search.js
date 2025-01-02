@@ -23,9 +23,7 @@ export function setupSearch(config) {
   const spinner = document.getElementById(spinnerId);
   const resultsContainer = document.getElementById(resultsId);
   const paginationDiv = document.getElementById(paginationId);
-  const prevPage = document.getElementById(prevPageId);
-  const nextPage = document.getElementById(nextPageId);
-  const pageInfo = document.getElementById(pageInfoId);
+  const showMoreButton = document.getElementById('showMore');
   const errorMessage = document.createElement('div');
   errorMessage.className = 'error-message';
   errorMessage.textContent = 'Please enter a search term';
@@ -48,6 +46,9 @@ export function setupSearch(config) {
     }
     return true;
   }
+  showMoreButton.addEventListener('click', () => {
+    searchTranscripts(true);
+  });
 
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -60,59 +61,44 @@ export function setupSearch(config) {
       searchTranscripts();
     }
   });
-  
-  prevPage.addEventListener('click', () => {
-    if (currentPage > 1) {
-      searchTranscripts(currentPage - 1);
-    }
-  });
-  nextPage.addEventListener('click', () => {
-    searchTranscripts(currentPage + 1);
-  });
 
   /**
    * Performs the actual search and updates UI elements.
    * @param {number} page - Page number to query
    */
-  async function searchTranscripts(page = 1) {
+  async function searchTranscripts(appendResults = false) {
     searchInput.disabled = true;
     searchButton.disabled = true;
+    showMoreButton.disabled = true;
     searchButton.innerText = 'Searching...';
     spinner.style.display = 'block';
-    resultsContainer.innerHTML = '';
+    
+    if (!appendResults) {
+      resultsContainer.innerHTML = '';
+      currentPage = 1;
+      currentContinuationToken = null;
+    }
 
     try {
       let url = `https://odin.thorscodex.com/api/SearchAllFatherFullText?query=${encodeURIComponent(
         searchInput.value
       )}&pageSize=${pageSize}`;
       
-      if (page > 1 && currentContinuationToken) {
+      if (currentContinuationToken) {
         url += `&continuationToken=${encodeURIComponent(currentContinuationToken)}`;
       }
     
       const response = await fetch(url);
       const data = await response.json();
     
-      // Store continuation token for next page
       currentContinuationToken = data.continuationToken;
-    
-      // Show/hide pagination based on continuation token
       paginationDiv.classList.toggle('hidden', !data.continuationToken);
+      showMoreButton.disabled = !data.continuationToken;
     
-      if (data.continuationToken) {
-        currentPage = page;
-        pageInfo.textContent = `Page ${currentPage}`; // Simple page counter
-        prevPage.disabled = currentPage <= 1;
-        nextPage.disabled = !data.continuationToken;
+      if (!appendResults) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.appendChild(createInfoTooltip());
       }
-    
-      // Reset token when starting new search
-      if (page === 1) {
-        currentContinuationToken = null;
-      }
-
-      resultsContainer.innerHTML = '';
-      resultsContainer.appendChild(createInfoTooltip());
 
       const groupedResults = data.results.reduce((groups, item) => {
         const date = new Date(item.streamDate).toLocaleDateString();
@@ -163,6 +149,7 @@ export function setupSearch(config) {
     } finally {
       searchInput.disabled = false;
       searchButton.disabled = false;
+      showMoreButton.disabled = false;
       searchButton.innerText = 'Search';
       spinner.style.display = 'none';
     }
