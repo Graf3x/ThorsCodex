@@ -26,17 +26,14 @@ export function setupSearch(config) {
   const nextPage = document.getElementById(nextPageId);
   const pageInfo = document.getElementById(pageInfoId);
 
-  // Trigger search on Enter key
+
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       searchTranscripts();
     }
   });
 
-  // Trigger search on button click
   searchButton.addEventListener('click', () => searchTranscripts());
-
-  // Pagination
   prevPage.addEventListener('click', () => {
     if (currentPage > 1) {
       searchTranscripts(currentPage - 1);
@@ -75,7 +72,6 @@ export function setupSearch(config) {
         nextPage.disabled = currentPage >= data.totalPages;
       }
 
-
       resultsContainer.innerHTML = '';
       resultsContainer.appendChild(createInfoTooltip());
 
@@ -88,7 +84,6 @@ export function setupSearch(config) {
         return groups;
       }, {});
 
-      // Render grouped results
       Object.entries(groupedResults).forEach(([date, results]) => {
         const videoId = results[0].videoUrl.split('v=')[1];
         const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
