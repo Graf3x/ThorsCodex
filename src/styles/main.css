@@ -68,6 +68,29 @@ svg {
   word-wrap: break-word;
 }
 
+@keyframes bounce {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.bounce {
+  animation: bounce 0.5s ease-in-out;
+}
+
+.error-message {
+  color: #ffd68b;
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.error-message.show {
+  opacity: 1;
+}
+
 @media (max-width: 640px) {
   .tooltip {
     width: calc(100vw - 2rem);

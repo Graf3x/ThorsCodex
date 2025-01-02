@@ -26,15 +26,41 @@ export function setupSearch(config) {
   const prevPage = document.getElementById(prevPageId);
   const nextPage = document.getElementById(nextPageId);
   const pageInfo = document.getElementById(pageInfoId);
+  const errorMessage = document.createElement('div');
+  errorMessage.className = 'error-message';
+  errorMessage.textContent = 'Please enter a search term';
+  searchInput.parentNode.insertBefore(errorMessage, searchInput.nextSibling);
 
+  function validateInput() {
+    if (!searchInput.value.trim()) {
+      searchInput.classList.add('bounce');
+      errorMessage.classList.add('show');
+      
+      setTimeout(() => {
+        searchInput.classList.remove('bounce');
+      }, 500);
+      
+      setTimeout(() => {
+        errorMessage.classList.remove('show');
+      }, 3000);
+      
+      return false;
+    }
+    return true;
+  }
 
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      searchTranscripts();
+      if (validateInput()) {searchTranscripts();}
     }
   });
 
-  searchButton.addEventListener('click', () => searchTranscripts());
+  searchButton.addEventListener('click', () => {
+    if (validateInput()) {
+      searchTranscripts();
+    }
+  });
+  
   prevPage.addEventListener('click', () => {
     if (currentPage > 1) {
       searchTranscripts(currentPage - 1);
