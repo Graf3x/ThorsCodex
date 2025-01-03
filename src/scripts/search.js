@@ -102,7 +102,7 @@ export function setupSearch(config) {
     
       if (!appendResults) {
         resultsContainer.innerHTML = '';
-        resultsContainer.appendChild(createInfoTooltip());
+
       }
 
       const groupedResults = data.results.reduce((groups, item) => {
