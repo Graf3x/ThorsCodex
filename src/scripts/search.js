@@ -94,7 +94,22 @@ export function setupSearch(config) {
       }
     
       const response = await fetch(url);
+      
+      // Handle 404 Not Found case
+      if (response.status === 404) {
+        resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
+        paginationDiv.classList.add('hidden');
+        return;
+      }
+    
       const data = await response.json();
+      
+      // Check if we have results
+      if (!data || !data.results || data.results.length === 0) {
+        resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
+        paginationDiv.classList.add('hidden');
+        return;
+      }
     
       currentContinuationToken = data.continuationToken;
       paginationDiv.classList.toggle('hidden', !data.continuationToken);
