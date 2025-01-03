@@ -123,7 +123,7 @@ export function setupSearch(config) {
         groupElement.innerHTML = `
           <div class="cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
             <div class="flex flex-col md:flex-row items-center gap-4">
-              <img src="${thumbnailUrl}" alt="Video thumbnail" class="w-full md:w-32 rounded-lg">
+              <img src="${thumbnailUrl}" alt="Video thumbnail" class="w-full md:w-32 rounded-lg object-contain">
               <div class="text-center md:text-left">
                 <h3 class="text-md font-semibold">${results[0].videoTitle || 'Untitled Stream'}</h3>
                 <p class="text-gray-500">${date} - ${results.length} mentions</p>
