@@ -44,6 +44,7 @@ export function setupSearch(config) {
     return true;
   }
   showMoreButton.addEventListener('click', () => {
+    showMoreButton.innerText = 'Loading...';
     searchTranscripts(true);
   });
 
@@ -67,7 +68,14 @@ export function setupSearch(config) {
     searchInput.disabled = true;
     searchButton.disabled = true;
     showMoreButton.disabled = true;
-    searchButton.innerText = 'Searching...';
+    
+    // Update button text based on which action triggered the search
+    if (appendResults) {
+      showMoreButton.innerText = 'Loading...';
+    } else {
+      searchButton.innerText = 'Searching...';
+    }
+    
     spinner.style.display = 'block';
     
     if (!appendResults) {
@@ -148,6 +156,7 @@ export function setupSearch(config) {
       searchButton.disabled = false;
       showMoreButton.disabled = false;
       searchButton.innerText = 'Search';
+      showMoreButton.innerText = 'Show More';
       spinner.style.display = 'none';
     }
   }
