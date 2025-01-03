@@ -1,3 +1,10 @@
+/* Prevent horizontal overflow */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
 body {
   background-color: #082c41;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
@@ -63,10 +70,12 @@ body {
   }
 }
 
-/* Add these new rules */
+/* Handle container widths */
 .container {
+  width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 svg {
@@ -111,6 +120,18 @@ svg {
 
 .error-message.show {
   opacity: 1;
+}
+
+/* Ensure images and other content don't cause overflow */
+img, svg, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Add padding for notched displays */
+main {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right); 
 }
 
 @media (max-width: 640px) {
