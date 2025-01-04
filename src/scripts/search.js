@@ -45,7 +45,7 @@ export function setupSearch(config) {
   }
   showMoreButton.addEventListener('click', () => {
     showMoreButton.innerText = 'Loading...';
-    searchTransvcripts(true);
+    searchTranscripts(true);
   });
 
   searchInput.addEventListener('keypress', (e) => {
