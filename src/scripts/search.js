@@ -45,7 +45,7 @@ export function setupSearch(config) {
   }
   showMoreButton.addEventListener('click', () => {
     showMoreButton.innerText = 'Loading...';
-    searchTranscripts(true);
+    searchTransvcripts(true);
   });
 
   searchInput.addEventListener('keypress', (e) => {
@@ -136,7 +136,10 @@ export function setupSearch(config) {
         const groupElement = document.createElement('div');
         groupElement.classList.add('bg-white', 'rounded-lg', 'p-4', 'my-4', 'shadow-lg');
         groupElement.innerHTML = `
-          <div class="cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+          <div class="cursor-pointer video-group" 
+               data-video-id="${videoId}" 
+               data-search-terms="${encodeURIComponent(searchInput.value)}"
+               onclick="this.nextElementSibling.classList.toggle('hidden'); this.dispatchEvent(new CustomEvent('loadTranscripts'))">
             <div class="flex flex-col md:flex-row items-center gap-4">
               <img src="${thumbnailUrl}" alt="Video thumbnail" class="w-full md:w-32 rounded-lg object-contain">
               <div class="text-center md:text-left">
@@ -145,24 +148,19 @@ export function setupSearch(config) {
               </div>
             </div>
           </div>
-          <div class="hidden mt-4 pl-4 border-l-2 border-gray-200">
-            ${results
-              .map(
-                (result) => `
-                  <div class="py-2">
-                    <p class="text-gray-600">${result.text}</p>
-                    <a href="${result.videoUrl}&t=${result.timestampSeconds}" 
-                       target="_blank"
-                       class="text-sm text-blue-500 hover:text-blue-700">
-                      Watch at ${formatTimestamp(result.timestampSeconds)}
-                    </a>
-                  </div>
-                `
-              )
-              .join('')}
+          <div class="hidden mt-4 pl-4 border-l-2 border-gray-200 transcript-container">
+            <div class="loading-spinner hidden">Loading transcripts...</div>
+            <div class="transcript-content"></div>
           </div>
         `;
         resultsContainer.appendChild(groupElement);
+
+        const videoGroup = groupElement.querySelector('.video-group');
+        videoGroup.addEventListener('loadTranscripts', () => {
+          if (!videoGroup.nextElementSibling.querySelector('.transcript-content').innerHTML) {
+            loadVideoTranscripts(videoGroup);
+          }
+        });
       });
     } catch (err) {
       console.error(err);
@@ -201,5 +199,51 @@ export function setupSearch(config) {
   
     tooltipContainer.appendChild(tooltip);
     return tooltipContainer;
+  }
+}
+
+async function loadVideoTranscripts(videoGroup) {
+  const transcriptContainer = videoGroup.nextElementSibling;
+  const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
+  const transcriptContent = transcriptContainer.querySelector('.transcript-content');
+  
+  const videoId = videoGroup.dataset.videoId;
+  const searchTerms = decodeURIComponent(videoGroup.dataset.searchTerms);
+
+  try {
+    loadingSpinner.classList.remove('hidden');
+    transcriptContent.innerHTML = '';
+
+    const response = await fetch(`https://odin.thorscodex.com/api/AskHeimdallForDetails?videoId=${videoId}&terms=${encodeURIComponent(searchTerms)}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch transcripts');
+    }
+
+    const data = await response.json();
+
+    if (!data.Results || data.Results.length === 0) {
+      transcriptContent.innerHTML = '<p class="text-gray-500">No transcripts found</p>';
+      return;
+    }
+
+    transcriptContent.innerHTML = data.Results
+      .map(result => `
+        <div class="py-2">
+          <p class="text-gray-600">${result.Text}</p>
+          <a href="${result.VideoUrlWithTimestamp}" 
+             target="_blank"
+             class="text-sm text-blue-500 hover:text-blue-700">
+            Watch at ${formatTimestamp(result.TimestampSeconds)}
+          </a>
+        </div>
+      `)
+      .join('');
+
+  } catch (error) {
+    console.error('Error loading transcripts:', error);
+    transcriptContent.innerHTML = '<p class="text-red-500">Error loading transcripts</p>';
+  } finally {
+    loadingSpinner.classList.add('hidden');
   }
 }
