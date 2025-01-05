@@ -1,4 +1,4 @@
-const pageSize = 100;
+const pageSize = 25;
 let currentPage = 1;
 let currentContinuationToken = null;
 
