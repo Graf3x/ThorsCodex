@@ -2,6 +2,19 @@ const pageSize = 25;
 let currentPage = 1;
 let currentContinuationToken = null;
 
+
+/**
+ * Converts seconds to M:SS format
+ * @param {number} seconds
+ * @returns {string}
+ */
+export function formatTimestamp(seconds) {
+  if (!seconds && seconds !== 0) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
 /**
  * Initializes the search functionality.
  * @param {Object} config - Configuration with element IDs
@@ -174,17 +187,6 @@ export function setupSearch(config) {
     }
   }
 
-  /**
-   * Converts seconds to M:SS format
-   * @param {number} seconds
-   * @returns {string}
-   */
-  function formatTimestamp(seconds) {
-    if (!seconds && seconds !== 0) return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
   
 
   /**
@@ -204,7 +206,7 @@ export function setupSearch(config) {
   }
 }
 
-async function loadVideoTranscripts(videoGroup) {
+export async function loadVideoTranscripts(videoGroup) {
   const transcriptContainer = videoGroup.nextElementSibling;
   const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
   const transcriptContent = transcriptContainer.querySelector('.transcript-content');
