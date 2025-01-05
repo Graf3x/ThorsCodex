@@ -180,10 +180,12 @@ export function setupSearch(config) {
    * @returns {string}
    */
   function formatTimestamp(seconds) {
+    if (!seconds && seconds !== 0) return '0:00';
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+    const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
+  
 
   /**
    * Creates an info tooltip element.
@@ -221,20 +223,23 @@ async function loadVideoTranscripts(videoGroup) {
     }
 
     const data = await response.json();
+    console.log('API Response:', data); // Debug logging
 
-    if (!data.Results || data.Results.length === 0) {
+    // Check for results property (lowercase)
+    const results = data.results || [];
+    if (results.length === 0) {
       transcriptContent.innerHTML = '<p class="text-gray-500">No transcripts found</p>';
       return;
     }
 
-    transcriptContent.innerHTML = data.Results
+    transcriptContent.innerHTML = results
       .map(result => `
         <div class="py-2">
-          <p class="text-gray-600">${result.Text}</p>
-          <a href="${result.VideoUrlWithTimestamp}" 
+          <p class="text-gray-600">${result.text}</p>
+          <a href="${result.videoUrlWithTimestamp}" 
              target="_blank"
              class="text-sm text-blue-500 hover:text-blue-700">
-            Watch at ${formatTimestamp(result.TimestampSeconds)}
+            Watch at ${formatTimestamp(result.timestampSeconds)}
           </a>
         </div>
       `)
