@@ -1,4 +1,4 @@
-const pageSize = 25;
+const pageSize = 10;
 let currentPage = 1;
 let currentContinuationToken = null;
 
@@ -225,7 +225,6 @@ export async function loadVideoTranscripts(videoGroup) {
     }
 
     const data = await response.json();
-    console.log('API Response:', data); // Debug logging
 
     // Check for results property (lowercase)
     const results = data.results || [];
