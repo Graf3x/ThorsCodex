@@ -157,7 +157,7 @@ export function setupSearch(config) {
               <img src="${thumbnailUrl}" alt="Video thumbnail" class="w-full md:w-32 rounded-lg object-contain">
               <div class="text-center md:text-left">
                 <h3 class="text-md font-semibold">${results[0].videoTitle || 'Untitled Stream'}</h3>
-                <p class="text-gray-500">${date}  ${results.length} </p>
+                <p class="text-gray-500">${date} </p>
               </div>
             </div>
           </div>
