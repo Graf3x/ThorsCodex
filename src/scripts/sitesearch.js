@@ -247,7 +247,7 @@ export async function loadVideoTranscripts(videoGroup) {
 
     transcriptContent.innerHTML = Object.entries(groupedResults)
       .map(([part, group]) => `
-        <div class="transcript-group flex gap-4 mb-8 border-b pb-4">
+        <div class="transcript-group flex gap-4 mb-2 border-b pb-4">
           <div class="transcript-content flex-1">
             ${group.transcripts.map(result => `
               <div class="py-2">
@@ -261,16 +261,16 @@ export async function loadVideoTranscripts(videoGroup) {
             `).join('')}
           </div>
           ${group.summary?.trim() ? `
-            <div class="summary-sidebar w-1/3 pl-4 border-l">
+            <div class="summary-sidebar w-1/2 pl-4 border-l">
               <div class="sticky top-4">
-                <h4 class="text-sm font-semibold text-gray-700 mb-2">Summary</h4>
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Context:</h4>
                 <p class="text-sm text-gray-600 leading-relaxed">${group.summary}</p>
               </div>
             </div>
           ` : ''}
         </div>
       `).join('');
-      
+
 
   } catch (error) {
     console.error('Error loading transcripts:', error);
