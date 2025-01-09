@@ -225,26 +225,52 @@ export async function loadVideoTranscripts(videoGroup) {
     }
 
     const data = await response.json();
-
-    // Check for results property (lowercase)
     const results = data.results || [];
+    
     if (results.length === 0) {
       transcriptContent.innerHTML = '<p class="text-gray-500">No transcripts found</p>';
       return;
     }
 
-    transcriptContent.innerHTML = results
-      .map(result => `
-        <div class="py-2">
-          <p class="text-gray-600">${result.text}</p>
-          <a href="${result.videoUrlWithTimestamp}" 
-             target="_blank"
-             class="text-sm text-blue-500 hover:text-blue-700">
-            Watch at ${formatTimestamp(result.timestampSeconds)}
-          </a>
+    // Group results by partNumber
+    const groupedResults = results.reduce((acc, result) => {
+      const part = result.partNumber || 0;
+      if (!acc[part]) {
+        acc[part] = {
+          transcripts: [],
+          summary: result.summary
+        };
+      }
+      acc[part].transcripts.push(result);
+      return acc;
+    }, {});
+
+    transcriptContent.innerHTML = Object.entries(groupedResults)
+      .map(([part, group]) => `
+        <div class="transcript-group flex gap-4 mb-8 border-b pb-4">
+          <div class="transcript-content flex-1">
+            ${group.transcripts.map(result => `
+              <div class="py-2">
+                <p class="text-gray-600">${result.text}</p>
+                <a href="${result.videoUrlWithTimestamp}" 
+                   target="_blank"
+                   class="text-sm text-blue-500 hover:text-blue-700">
+                  Watch at ${formatTimestamp(result.timestampSeconds)}
+                </a>
+              </div>
+            `).join('')}
+          </div>
+          ${group.summary?.trim() ? `
+            <div class="summary-sidebar w-1/3 pl-4 border-l">
+              <div class="sticky top-4">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Summary</h4>
+                <p class="text-sm text-gray-600 leading-relaxed">${group.summary}</p>
+              </div>
+            </div>
+          ` : ''}
         </div>
-      `)
-      .join('');
+      `).join('');
+      
 
   } catch (error) {
     console.error('Error loading transcripts:', error);
