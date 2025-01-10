@@ -133,7 +133,7 @@ export function setupSearch(config) {
 
       }
 
-      const groupedResults = data.results.reduce((groups, item) => {
+      const groupedResults = data.value.results.reduce((groups, item) => {
         const date = new Date(item.streamDate).toLocaleDateString();
         if (!groups[date]) {
           groups[date] = [];
