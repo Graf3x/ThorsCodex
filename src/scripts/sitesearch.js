@@ -115,7 +115,7 @@ export function setupSearch(config) {
         return;
       }
     
-      const data = (await response.json()).value;
+      const data = await response.json();
       
       // Check if we have results
       if (!data || !data.results || data.results.length === 0) {
