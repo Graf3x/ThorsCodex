@@ -115,7 +115,7 @@ export function setupSearch(config) {
         return;
       }
     
-      const data = await response.json();
+      const data = (await response.json()).value;
       
       // Check if we have results
       if (!data || !data.results || data.results.length === 0) {
@@ -133,7 +133,7 @@ export function setupSearch(config) {
 
       }
 
-      const groupedResults = data.value.results.reduce((groups, item) => {
+      const groupedResults = data.results.reduce((groups, item) => {
         const date = new Date(item.streamDate).toLocaleDateString();
         if (!groups[date]) {
           groups[date] = [];
