@@ -18,9 +18,17 @@
      
     <h1 class="text-5xl text-white mb-8">Thor's Codex</h1>
     <input type="text" id="searchInput" class="w-1/2 p-4 text-xl rounded-lg mb-4" placeholder="Search..." />
-    <button id="searchButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
-      Search
-    </button>
+    <div class="flex flex-col gap-2">
+      <button id="searchButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
+        Search
+      </button>
+      <button id="toggleTags" class="flex items-center gap-1 px-3 py-1 text-sm text-gray-300 hover:text-white transition-colors">
+        <span>Browse Tags</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
     <div id="spinner" class="spinner">
       <svg viewBox="0 0 64 64" class="pixel-book-spinner">
         <!-- Back cover -->
@@ -35,11 +43,11 @@
         </text>
       </svg>
     </div>
-    <section id="words" class="min-h-fit bg-portfolio-green hidden">
+    <section id="words" class="min-h-fit bg-portfolio-green opacity-0 hidden">
       <div class="container mx-auto py-16">
-          <h2 class="text-4xl font-bold text-center mb-8">Words</h2>
-          <div id="skill-tags" class="flex flex-wrap justify-center gap-4 skill-tags">
-              <!-- Skill Tags -->
+          <h2 class="text-4xl font-bold text-center mb-8 text-white">Words</h2>
+          <div id="word-tags" class="flex flex-wrap justify-center gap-4 word-tags">
+             
           </div>
       </div>
     </section>

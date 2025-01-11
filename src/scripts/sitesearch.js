@@ -1,3 +1,5 @@
+import { inView, animate, stagger } from "https://cdn.jsdelivr.net/npm/framer-motion@11.11.11/dom/+esm";
+
 const pageSize = 10;
 let currentPage = 1;
 let currentContinuationToken = null;
@@ -14,6 +16,55 @@ export function formatTimestamp(seconds) {
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
+
+function setupTagsAnimation() {
+  const wordsSection = document.getElementById('words');
+  const toggleButton = document.getElementById('toggleTags');
+  const tagElements = document.querySelectorAll('#word-tags span');
+
+  // Initial render (hidden)
+  renderWordCloud();
+
+  toggleButton.addEventListener('click', () => {
+    wordsSection.classList.toggle('hidden');
+    
+    if (!wordsSection.classList.contains('hidden')) {
+      // Animate section
+      animate(wordsSection, 
+        { opacity: [0, 1] },
+        { duration: 0.3 }
+      );
+
+      // Animate tags with stagger
+      animate(tagElements,
+        { opacity: [0, 1], transform: ['translateY(20px)', 'translateY(0)'] },
+        { 
+          duration: 0.5,
+          delay: stagger(0.05),
+          easing: 'ease-out'
+        }
+      );
+    }
+  });
+}
+
+
+
+function renderWordCloud() {
+  const container = document.getElementById('word-tags');
+  const skills = [
+    'Azure', '.NET Core', 'jQuery', 'C#', 'Typescript', 'Razor',
+    // ...existing skills...
+  ];
+
+  skills.forEach((sk) => {
+    const projectElement = document.createElement('span');
+    projectElement.className = 'bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm opacity-0';
+    projectElement.innerHTML = sk;
+    container.appendChild(projectElement);
+  });
+}
+
 
 /**
  * Initializes the search functionality.
@@ -38,7 +89,7 @@ export function setupSearch(config) {
   errorMessage.className = 'error-message';
   errorMessage.textContent = 'Please enter a search term';
   searchInput.parentNode.insertBefore(errorMessage, searchInput.nextSibling);
-
+  setupTagsAnimation();
   function validateInput() {
     if (!searchInput.value.trim()) {
       searchInput.classList.add('bounce');

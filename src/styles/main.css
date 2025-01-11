@@ -20,6 +20,15 @@ body {
   overflow-y: auto;
 }
 
+#words {
+  transition: opacity 0.3s ease-out;
+}
+
+#word-tags span {
+  color: white;
+  cursor: default;
+}
+
 .sticky {
   position: sticky;
   top: 1rem;
