@@ -248,7 +248,23 @@ export function setupSearch(config) {
         `;
         resultsContainer.appendChild(groupElement);
 
+        inView(groupElement, () => {
+          animate(
+            groupElement,
+            { 
+              opacity: [0, 1],
+              transform: ['translateY(20px)', 'translateY(0)']
+            },
+            { 
+              duration: 0.5,
+              easing: 'ease-out'
+            }
+          );
+          return false;
+        });
+
         const videoGroup = groupElement.querySelector('.video-group');
+
         videoGroup.addEventListener('loadTranscripts', () => {
           if (!videoGroup.nextElementSibling.querySelector('.transcript-content').innerHTML) {
             loadVideoTranscripts(videoGroup);
