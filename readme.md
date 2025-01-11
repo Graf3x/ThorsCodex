@@ -39,6 +39,10 @@ This system uses a combination of:
   - **Prime Experience**: Uses asure ai search or elastic/solar or similar tools for searches.
   - **Fallback Experience**: Uses a normal DB search (ie: contains) as an initial, simple fallback.
   
+  **Known Issues**
+  - Using "word1 word2" will not return that exact phrase. This is a current limitation of the searching algo. It uses BM25 and that, from my understanding, can not handle multi word phrases. I break the words up and tell it to do a "ALL" right now as a work around till the newer search experence is added.
+  - Using "" results in a shorter than expected word list of videos.
+   Non-quoted words hit a summery list of words used in a segment of a video, so it is able to index a few 100 documents instead of a few 1000 and return very quickly. When you use a quote and other words you are saying "I want this exact word and other words in my transcript result". So i do the searching differently and it takes a significantly more resources. To keep this reasonable for the user and the free service, i return less results per search button click. 
   
 ## Getting Started
 
