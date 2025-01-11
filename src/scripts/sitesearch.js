@@ -117,10 +117,7 @@ export function setupSearch(config) {
   const resultsContainer = document.getElementById(resultsId);
   const paginationDiv = document.getElementById(paginationId);
   const showMoreButton = document.getElementById('showMore');
-  const errorMessage = document.createElement('div');
-  errorMessage.className = 'error-message';
-  errorMessage.textContent = 'Please enter a search term';
-  searchInput.parentNode.insertBefore(errorMessage, searchInput.nextSibling);
+  const errorMessage = document.getElementById('error-message');
   setupTagsAnimation();
   function validateInput() {
     if (!searchInput.value.trim()) {
@@ -268,24 +265,6 @@ export function setupSearch(config) {
       showMoreButton.innerText = 'Show More';
       spinner.style.display = 'none';
     }
-  }
-
-  
-
-  /**
-   * Creates an info tooltip element.
-   * @returns {HTMLElement} The tooltip element
-   */
-  function createInfoTooltip() {
-    const tooltipContainer = document.createElement('div');
-    tooltipContainer.className = 'tooltip-container';
-  
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip invisible group-hover:visible absolute p-2 bg-gray-800 text-sm rounded-lg text-white';
-    tooltip.textContent = 'Results are grouped by stream, showing 100 mentions per page';
-  
-    tooltipContainer.appendChild(tooltip);
-    return tooltipContainer;
   }
 }
 

@@ -18,6 +18,7 @@
      
     <h1 class="text-5xl text-white mb-8">Thor's Codex</h1>
     <input type="text" id="searchInput" class="w-1/2 p-4 text-xl rounded-lg mb-4" placeholder="Search..." />
+    <div id="error-message" class="error-message">Please enter a search term</div>
     <div class="flex flex-col gap-2">
       <button id="searchButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg">
         Search
@@ -41,6 +42,7 @@
         <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm opacity-0" data-fequency="2000">Fracking</span>
         <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm opacity-0" data-fequency="4706">Ridiculous</span>
         <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm opacity-0" data-fequency="3506">Shorts</span>
+        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm opacity-0" data-fequency="606">Banana</span>
         <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm opacity-0" data-fequency="12600">Interesting</span>
           </div>
       </div>
@@ -101,7 +103,7 @@
         <span>View on GitHub</span>
       </a>
       
-      <div class="hover:text-gray-300 ">
+      <div  id="bmac" class="min-h-[215px]">
         <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" 
         data-name="bmc-button" data-slug="joshp" data-color="rgb(31, 41, 55)"
          data-emoji="" data-font="Cookie" data-text="Buy me a coffee"
