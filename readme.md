@@ -32,7 +32,9 @@ This system uses a combination of:
 - **[ThorsCodex.Transcripts.to.CSV](https://github.com/Graf3x/ThorsCodex.Transcripts.to.CSV)** : Quick app to gather transcript text.
 - **Serverless functions**: API's to route requests and scale based on traffic load. These services will later down-step traffic to different experences for searching based on server load/traffic. Those experences are listed below:
 
- - **Current Search Experence**: NoSQL DB and a Full Text search, it uses BM25 which from my understanding can not handle multiword phrases. Currently working around this by making "cursed quest" into "cursed" "quest" and saying it needs to find all of the strings.
+## Searching 
+
+  - **Current Search Experence**: NoSQL DB and a Full Text search, it uses BM25 which from my understanding can not handle multiword phrases. Currently working around this by making "cursed quest" into "cursed" "quest" and saying it needs to find all of the strings.
   - **Advanced Experience**: Uses RAG and LLM to return responses. (Hybrid Search?)
   - **Prime Experience**: Uses asure ai search or elastic/solar or similar tools for searches.
   - **Fallback Experience**: Uses a normal DB search (ie: contains) as an initial, simple fallback.
