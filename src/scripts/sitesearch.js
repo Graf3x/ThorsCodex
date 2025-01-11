@@ -53,8 +53,8 @@ function setupTagsAnimation() {
 function renderWordCloud() {
   const container = document.getElementById('word-tags');
   const skills = [
-    'Azure', '.NET Core', 'jQuery', 'C#', 'Typescript', 'Razor',
-    // ...existing skills...
+    'Ferrets', 'Blizzard', 'Pants', 'Goblin', 'Fracking', 'ridiculous', 'Shorts', 'awesome','amazing'
+    
   ];
 
   skills.forEach((sk) => {
