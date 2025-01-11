@@ -21,21 +21,71 @@ function setupTagsAnimation() {
   const wordsSection = document.getElementById('words');
   const toggleButton = document.getElementById('toggleTags');
   const tagElements = document.querySelectorAll('#word-tags span');
+  
 
-  // Initial render (hidden)
-  renderWordCloud();
+tagElements.forEach(tag => {
+  tag.style.cursor = 'pointer';
+  tag.addEventListener('click', async () => {
+    if (tag.classList.contains('disabled')) return;
+  
+    searchInput.value = tag.textContent.trim();
+    
+    tagElements.forEach(t => {
+      t.classList.add('disabled');
+      t.style.opacity = '0.5';
+      t.style.pointerEvents = 'none';
+    });
+    searchButton.click();
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.target.disabled === false) {
+          tagElements.forEach(t => {
+            t.classList.remove('disabled');
+            t.style.opacity = '1';
+            t.style.pointerEvents = 'auto';
+          });
+          observer.disconnect();
+        }
+      });
+    });
+    
+    observer.observe(searchButton, {
+      attributes: true,
+      attributeFilter: ['disabled']
+    });
+  });
+});
+
+  const frequencies = Array.from(tagElements).map(tag => 
+    parseInt(tag.dataset.fequency, 10)
+  );
+  
+ 
+  const minFreq = Math.min(...frequencies);
+  const maxFreq = Math.max(...frequencies);
+  
+
+  const scale = (num) => {
+    return 0.75 + (
+      ((num - minFreq) / (maxFreq - minFreq)) * 1.03
+    );
+  };
+  
+  tagElements.forEach(tag => {
+    const freq = parseInt(tag.dataset.fequency, 10);
+    const size = scale(freq);
+    tag.style.fontSize = `${size}rem`;
+  });
 
   toggleButton.addEventListener('click', () => {
     wordsSection.classList.toggle('hidden');
     
     if (!wordsSection.classList.contains('hidden')) {
-      // Animate section
       animate(wordsSection, 
         { opacity: [0, 1] },
         { duration: 0.3 }
       );
-
-      // Animate tags with stagger
       animate(tagElements,
         { opacity: [0, 1], transform: ['translateY(20px)', 'translateY(0)'] },
         { 
@@ -47,24 +97,6 @@ function setupTagsAnimation() {
     }
   });
 }
-
-
-
-function renderWordCloud() {
-  const container = document.getElementById('word-tags');
-  const skills = [
-    'Ferrets', 'Blizzard', 'Pants', 'Goblin', 'Fracking', 'ridiculous', 'Shorts', 'awesome','amazing'
-    
-  ];
-
-  skills.forEach((sk) => {
-    const projectElement = document.createElement('span');
-    projectElement.className = 'bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm opacity-0';
-    projectElement.innerHTML = sk;
-    container.appendChild(projectElement);
-  });
-}
-
 
 /**
  * Initializes the search functionality.
