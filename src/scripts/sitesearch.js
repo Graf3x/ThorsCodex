@@ -77,7 +77,7 @@ tagElements.forEach(tag => {
     const size = scale(freq);
     tag.style.fontSize = `${size}rem`;
   });
-
+ 
   toggleButton.addEventListener('click', () => {
     wordsSection.classList.toggle('hidden');
     
