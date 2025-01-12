@@ -1,8 +1,37 @@
 import { inView, animate, stagger } from "https://cdn.jsdelivr.net/npm/framer-motion@11.11.11/dom/+esm";
 
+class UrlGenerator {
+  constructor(altMode = false) {
+    this._altMode = altMode;
+  }
+
+  get topUrl() {
+    return this._altMode
+      ? 'AskAllFatherAISearch'
+      : 'SearchAllFatherFullText';
+  }
+
+  get detailsUrl() {
+    return this._altMode
+      ? 'AskHeimdall'
+      : 'AskHeimdallForDetails';
+  }
+
+  set altMode(value) {
+    this._altMode = Boolean(value);
+  }
+
+  get altMode() {
+    return this._altMode;
+  }
+}
+
+
+const urlGenerator = new UrlGenerator();
 const pageSize = 10;
 let currentPage = 1;
 let currentContinuationToken = null;
+
 
 
 /**
@@ -21,74 +50,74 @@ function setupTagsAnimation() {
   const wordsSection = document.getElementById('words');
   const toggleButton = document.getElementById('toggleTags');
   const tagElements = document.querySelectorAll('#word-tags span');
-  
 
-tagElements.forEach(tag => {
-  tag.style.cursor = 'pointer';
-  tag.addEventListener('click', async () => {
-    if (tag.classList.contains('disabled')) return;
-  
-    searchInput.value = tag.textContent.trim();
-    
-    tagElements.forEach(t => {
-      t.classList.add('disabled');
-      t.style.opacity = '0.5';
-      t.style.pointerEvents = 'none';
-    });
-    searchButton.click();
-    
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.target.disabled === false) {
-          tagElements.forEach(t => {
-            t.classList.remove('disabled');
-            t.style.opacity = '1';
-            t.style.pointerEvents = 'auto';
-          });
-          observer.disconnect();
-        }
+
+  tagElements.forEach(tag => {
+    tag.style.cursor = 'pointer';
+    tag.addEventListener('click', async () => {
+      if (tag.classList.contains('disabled')) return;
+
+      searchInput.value = tag.textContent.trim();
+
+      tagElements.forEach(t => {
+        t.classList.add('disabled');
+        t.style.opacity = '0.5';
+        t.style.pointerEvents = 'none';
+      });
+      searchButton.click();
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.target.disabled === false) {
+            tagElements.forEach(t => {
+              t.classList.remove('disabled');
+              t.style.opacity = '1';
+              t.style.pointerEvents = 'auto';
+            });
+            observer.disconnect();
+          }
+        });
+      });
+
+      observer.observe(searchButton, {
+        attributes: true,
+        attributeFilter: ['disabled']
       });
     });
-    
-    observer.observe(searchButton, {
-      attributes: true,
-      attributeFilter: ['disabled']
-    });
   });
-});
 
-  const frequencies = Array.from(tagElements).map(tag => 
-    parseInt(tag.dataset.fequency, 10)
+  const frequencies = Array.from(tagElements).map(tag =>
+    parseInt(tag.dataset.frequency, 10)
   );
-  
- 
+
+
   const minFreq = Math.min(...frequencies);
   const maxFreq = Math.max(...frequencies);
-  
+
 
   const scale = (num) => {
     return 0.75 + (
       ((num - minFreq) / (maxFreq - minFreq)) * 1.03
     );
   };
-  
+
   tagElements.forEach(tag => {
-    const freq = parseInt(tag.dataset.fequency, 10);
+    const freq = parseInt(tag.dataset.frequency, 10);
     const size = scale(freq);
     tag.style.fontSize = `${size}rem`;
   });
- 
+
   toggleButton.addEventListener('click', () => {
     wordsSection.classList.toggle('hidden');
-    
+
     if (!wordsSection.classList.contains('hidden')) {
-      animate(wordsSection, 
+      animate(wordsSection,
         { opacity: [0, 1] },
         { duration: 0.3 }
       );
       animate(tagElements,
         { opacity: [0, 1], transform: ['translateY(20px)', 'translateY(0)'] },
-        { 
+        {
           duration: 0.5,
           delay: stagger(0.05),
           easing: 'ease-out'
@@ -118,21 +147,21 @@ export function setupSearch(config) {
   const paginationDiv = document.getElementById(paginationId);
   const showMoreButton = document.getElementById('showMore');
   const errorMessage = document.getElementById('error-message');
-  
+
   setupTagsAnimation();
   function validateInput() {
     if (!searchInput.value.trim()) {
       searchInput.classList.add('bounce');
       errorMessage.classList.add('show');
-      
+
       setTimeout(() => {
         searchInput.classList.remove('bounce');
       }, 500);
-      
+
       setTimeout(() => {
         errorMessage.classList.remove('show');
       }, 3000);
-      
+
       return false;
     }
     return true;
@@ -144,7 +173,7 @@ export function setupSearch(config) {
 
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      if (validateInput()) {searchTranscripts();}
+      if (validateInput()) { searchTranscripts(); }
     }
   });
 
@@ -162,154 +191,53 @@ export function setupSearch(config) {
     searchInput.disabled = true;
     searchButton.disabled = true;
     showMoreButton.disabled = true;
-    
+
 
     if (appendResults) {
       showMoreButton.innerText = 'Loading...';
     } else {
       searchButton.innerText = 'Searching...';
     }
-    
+
     spinner.style.display = 'block';
-    
+
     if (!appendResults) {
       resultsContainer.innerHTML = '';
       currentPage = 1;
       currentContinuationToken = null;
     }
 
-    class UrlGenerator {
-      constructor(altMode = false) {
-          this._altMode = altMode;
-      }
-  
-      get topUrl() {
-          return this._altMode 
-              ? 'AskAllFatherAISearch'
-              : 'SearchAllFatherFullText';
-      }
-  
-      get detailsUrl() {
-          return this._altMode 
-              ? 'AskHeimdall'
-              : 'AskHeimdallForDetails';
-      }
-  
-      set altMode(value) {
-          this._altMode = Boolean(value);
-      }
-  
-      get altMode() {
-          return this._altMode;
-      }
-    }
-
-    const configToggle = document.getElementById('configToggle');
-    const configSection = document.getElementById('configSection');
-    const modal = document.getElementById('configSection');
-    const modalContent = modal.querySelector('div');
-    const closeModal = document.getElementById('closeModal');
-    const confirmSettings = document.getElementById('confirmSettings');
-
-    function showModal(e) {
-        e.stopPropagation();
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.add('opacity-100');
-            modalContent.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
-
-    function hideModal() {
-        modal.classList.remove('opacity-100');
-        modalContent.classList.remove('scale-100', 'opacity-100');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
-
-    closeModal.addEventListener('click', hideModal);
-    confirmSettings.addEventListener('click', hideModal);
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            hideModal();
-        }
-    });
-
-    const altModeToggle = document.getElementById('altModeToggle');
-    const toggleDot = document.querySelector('.toggle-dot');
-    const toggleBackground = altModeToggle.parentElement.querySelector('.w-10');
-    const urlGenerator = new UrlGenerator();
-
-    function updateToggleState(checked) {
-       
-        toggleDot.classList.toggle('translate-x-4', checked);
-        toggleBackground.classList.toggle('bg-blue-600', checked);
-        toggleBackground.classList.toggle('bg-gray-600', !checked);
-        altModeToggle.checked = checked;
-                
-        urlGenerator.altMode = checked;
-        localStorage.setItem('altModeEnabled', checked);
-
-    }
-
-    toggleBackground.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        updateToggleState(!altModeToggle.checked);
-    });
-
-    // Load saved preference
-    const savedAltMode = localStorage.getItem('altModeEnabled') === 'true';
-    updateToggleState(savedAltMode);
-
-
-    document.addEventListener('click', (e) => {
-      const configSection = document.getElementById('configSection');
-      const configToggle = document.getElementById('configToggle');
-      
-   
-      if (!configToggle.contains(e.target) && !configSection.contains(e.target)) {
-          configSection.classList.add('hidden');
-      }
-    });
-    
-    configToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        configSection.classList.toggle('hidden');
-    });
 
     try {
       let url = `https://odin.thorscodex.com/api/${urlGenerator.topUrl}?query=${encodeURIComponent(
         searchInput.value
       )}&pageSize=${pageSize}`;
-      
+
       if (currentContinuationToken) {
         url += `&continuationToken=${encodeURIComponent(currentContinuationToken)}`;
       }
-    
+
       const response = await fetch(url);
-      
-      
+
+
       if (response.status === 404) {
         resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
         paginationDiv.classList.add('hidden');
         return;
       }
-    
+
       const data = await response.json();
-      
+
       if (!data || !data.results || data.results.length === 0) {
         resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
         paginationDiv.classList.add('hidden');
         return;
       }
-    
+
       currentContinuationToken = data.continuationToken;
       paginationDiv.classList.toggle('hidden', !data.continuationToken);
       showMoreButton.disabled = !data.continuationToken;
-    
+
       if (!appendResults) {
         resultsContainer.innerHTML = '';
 
@@ -353,11 +281,11 @@ export function setupSearch(config) {
         inView(groupElement, () => {
           animate(
             groupElement,
-            { 
+            {
               opacity: [0, 1],
               transform: ['translateY(20px)', 'translateY(0)']
             },
-            { 
+            {
               duration: 0.5,
               easing: 'ease-out'
             }
@@ -390,7 +318,7 @@ export async function loadVideoTranscripts(videoGroup) {
   const transcriptContainer = videoGroup.nextElementSibling;
   const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
   const transcriptContent = transcriptContainer.querySelector('.transcript-content');
-  
+
   const videoId = videoGroup.dataset.videoId;
   const searchTerms = decodeURIComponent(videoGroup.dataset.searchTerms);
 
@@ -399,14 +327,14 @@ export async function loadVideoTranscripts(videoGroup) {
     transcriptContent.innerHTML = '';
 
     const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.detailsUrl}?videoId=${videoId}&terms=${encodeURIComponent(searchTerms)}`);
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch transcripts');
     }
 
     const data = await response.json();
     const results = data.results || [];
-    
+
     if (results.length === 0) {
       transcriptContent.innerHTML = '<p class="text-gray-500">No transcripts found</p>';
       return;
@@ -472,34 +400,59 @@ closeModal.removeEventListener('click', hideModal);
 confirmSettings.removeEventListener('click', hideModal);
 
 function showModal(e) {
-    e.stopPropagation();
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-        modal.classList.add('opacity-100');
-        modalContent.classList.add('scale-100', 'opacity-100');
-    }, 10);
+  e.stopPropagation();
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    modal.classList.add('opacity-100');
+    modalContent.classList.add('scale-100', 'opacity-100');
+  }, 10);
 }
 
 function hideModal() {
-    modal.classList.remove('opacity-100');
-    modalContent.classList.remove('scale-100', 'opacity-100');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
+  modal.classList.remove('opacity-100');
+  modalContent.classList.remove('scale-100', 'opacity-100');
+  setTimeout(() => {
+    modal.classList.add('hidden');
+  }, 300);
 }
+
+
+const altModeToggle = document.getElementById('altModeToggle');
+const toggleDot = document.querySelector('.toggle-dot');
+const toggleBackground = document.getElementById('toggle');
+
+
+function updateToggleState(checked) {
+
+    toggleDot.style.transform = checked ? 'translateX(1rem)' : 'translateX(0)';
+  
+  if (checked) {
+    toggleBackground.classList.add('bg-blue-600');
+    toggleBackground.classList.remove('bg-gray-600');
+  }
+  else {
+    toggleBackground.classList.remove('bg-blue-600');
+    toggleBackground.classList.add('bg-gray-600');
+  }
+  altModeToggle.checked = checked;
+  urlGenerator.altMode = checked;
+  localStorage.setItem('altModeEnabled', checked);
+
+}
+
+toggleBackground.addEventListener('click', (e) => {
+
+  e.preventDefault();
+  e.stopPropagation();
+  updateToggleState(!altModeToggle.checked);
+});
+
+const savedAltMode = localStorage.getItem('altModeEnabled') === 'true';
+updateToggleState(savedAltMode);
 
 
 configToggle.addEventListener('click', showModal);
 closeModal.addEventListener('click', hideModal);
 confirmSettings.addEventListener('click', hideModal);
-
-
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        hideModal();
-    }
-});
-
-document.getElementById('searchButton').addEventListener('click', (e) => {
-    e.stopPropagation();
-});
+modal.addEventListener('click', (e) => { if (e.target === modal) {hideModal();}});
+document.getElementById('searchButton').addEventListener('click', (e) => {  e.stopPropagation();});

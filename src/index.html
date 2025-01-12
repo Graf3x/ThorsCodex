@@ -5,7 +5,7 @@
   <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="./styles/main.css?v=3">
+  <link rel="stylesheet" href="./styles/main.css?v=4">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -41,10 +41,10 @@
             <div class="p-4">
               <label class="flex items-center gap-2 cursor-pointer text-white">
                 <input type="checkbox" id="altModeToggle" class="hidden">
-                <div class="w-10 h-6 bg-gray-600 rounded-full p-1 flex">
+                <div id="toggle" class="w-10 h-6 bg-gray-600 rounded-full p-1 flex">
                   <div class="toggle-dot w-4 h-4 bg-white rounded-full transition-transform"></div>
                 </div>
-                <span>Use Search Service (Work in Progress)</span>
+                <span>Use Search Service (Fast, but janky)</span>
               </label>
             </div>
             
@@ -169,7 +169,7 @@
   </div>
 </footer>
   <script type="module">
-    import { setupSearch,loadVideoTranscripts,formatTimestamp } from './scripts/sitesearch.js?v=3';
+    import { setupSearch,loadVideoTranscripts,formatTimestamp } from './scripts/sitesearch.js?v=4';
 
     setupSearch({
       inputId: 'searchInput',
