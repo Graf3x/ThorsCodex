@@ -178,7 +178,7 @@ export function setupSearch(config) {
     }
 
     try {
-      let url = `https://odin.thorscodex.com/api/SearchAllFatherFullText?query=${encodeURIComponent(
+      let url = `https://odin.thorscodex.com/api/AskHeimdall?query=${encodeURIComponent(
         searchInput.value
       )}&pageSize=${pageSize}`;
       
