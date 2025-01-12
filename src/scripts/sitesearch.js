@@ -178,7 +178,7 @@ export function setupSearch(config) {
     }
 
     try {
-      let url = `https://odin.thorscodex.com/api/AskHeimdall?query=${encodeURIComponent(
+      let url = `https://odin.thorscodex.com/api/AskAllFatherAISearch?query=${encodeURIComponent(
         searchInput.value
       )}&pageSize=${pageSize}`;
       
@@ -296,7 +296,7 @@ export async function loadVideoTranscripts(videoGroup) {
     loadingSpinner.classList.remove('hidden');
     transcriptContent.innerHTML = '';
 
-    const response = await fetch(`https://odin.thorscodex.com/api/AskHeimdallForDetails?videoId=${videoId}&terms=${encodeURIComponent(searchTerms)}`);
+    const response = await fetch(`https://odin.thorscodex.com/api/AskHeimdall?videoId=${videoId}&terms=${encodeURIComponent(searchTerms)}`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch transcripts');
