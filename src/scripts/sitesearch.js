@@ -352,7 +352,9 @@ export async function loadVideoTranscripts(videoGroup) {
       `).join('');
 
 
-  } catch (error) {
+    });
+  }
+    catch (error) {
     console.error('Error loading transcripts:', error);
     transcriptContent.innerHTML = '<p class="text-red-500">Error loading transcripts</p>';
   } finally {
