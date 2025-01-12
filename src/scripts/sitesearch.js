@@ -312,21 +312,19 @@ export async function loadVideoTranscripts(videoGroup) {
 
     // Group results by partNumber
     const groupedResults = results.reduce((acc, result) => {
-      const videoId = result.videoId || 'default'; // 'default' in case videoId is missing
-      if (!acc[videoId]) {
-        acc[videoId] = {
+      const part = result.partNumber || 0;
+      if (!acc[part]) {
+        acc[part] = {
           transcripts: [],
           summary: result.summary
         };
       }
-      acc[videoId].transcripts.push(result);
+      acc[part].transcripts.push(result);
       return acc;
     }, {});
 
-    Object.keys(groupedResults).forEach(videoId => { groupedResults[videoId].transcripts.sort((a, b) => a.partNumber - b.partNumber);
-                                                    
     transcriptContent.innerHTML = Object.entries(groupedResults)
-      .map(([videoId, group]) => `
+      .map(([part, group]) => `
         <div class="transcript-group flex gap-4 mb-2 border-b pb-4">
           <div class="transcript-content flex-1">
             ${group.transcripts.map(result => `
@@ -352,9 +350,7 @@ export async function loadVideoTranscripts(videoGroup) {
       `).join('');
 
 
-    });
-  }
-    catch (error) {
+  } catch (error) {
     console.error('Error loading transcripts:', error);
     transcriptContent.innerHTML = '<p class="text-red-500">Error loading transcripts</p>';
   } finally {
