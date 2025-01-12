@@ -16,7 +16,47 @@
 <body class="flex flex-col min-h-screen" style="background-color: #082c41;">
   <main class="flex-grow flex flex-col items-center justify-center w-full">
     <div class="flex flex-col items-center w-full gap-4">
-     
+      <div class="fixed top-4 right-4 z-50">
+        <button id="configToggle" class="p-2 text-gray-300 hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </button>
+        
+        <!-- Replace existing configSection with this modal -->
+        <div id="configSection" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 flex items-center justify-center z-50">
+          <div class="relative bg-gray-800 rounded-lg w-96 transform transition-all duration-300 scale-95 opacity-0">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+              <h3 class="text-lg font-medium text-white">Settings</h3>
+              <button id="closeModal" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-4">
+              <label class="flex items-center gap-2 cursor-pointer text-white">
+                <input type="checkbox" id="altModeToggle" class="hidden">
+                <div class="w-10 h-6 bg-gray-600 rounded-full p-1 flex">
+                  <div class="toggle-dot w-4 h-4 bg-white rounded-full transition-transform"></div>
+                </div>
+                <span>Use Search Service (Work in Progress)</span>
+              </label>
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex justify-end p-4 border-t border-gray-700">
+              <button id="confirmSettings" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     <h1 class="text-5xl text-white mb-8">Thor's Codex</h1>
     <input type="text" id="searchInput" class="w-1/2 p-4 text-xl rounded-lg mb-4" placeholder="Search..." />
     <div id="error-message" class="error-message">Please enter a search term</div>

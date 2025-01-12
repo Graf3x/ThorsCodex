@@ -118,6 +118,7 @@ export function setupSearch(config) {
   const paginationDiv = document.getElementById(paginationId);
   const showMoreButton = document.getElementById('showMore');
   const errorMessage = document.getElementById('error-message');
+  
   setupTagsAnimation();
   function validateInput() {
     if (!searchInput.value.trim()) {
@@ -162,7 +163,7 @@ export function setupSearch(config) {
     searchButton.disabled = true;
     showMoreButton.disabled = true;
     
-    // Update button text based on which action triggered the search
+
     if (appendResults) {
       showMoreButton.innerText = 'Loading...';
     } else {
@@ -177,8 +178,110 @@ export function setupSearch(config) {
       currentContinuationToken = null;
     }
 
+    class UrlGenerator {
+      constructor(altMode = false) {
+          this._altMode = altMode;
+      }
+  
+      get topUrl() {
+          return this._altMode 
+              ? 'AskAllFatherAISearch'
+              : 'SearchAllFatherFullText';
+      }
+  
+      get detailsUrl() {
+          return this._altMode 
+              ? 'AskHeimdall'
+              : 'AskHeimdallForDetails';
+      }
+  
+      set altMode(value) {
+          this._altMode = Boolean(value);
+      }
+  
+      get altMode() {
+          return this._altMode;
+      }
+    }
+
+    const configToggle = document.getElementById('configToggle');
+    const configSection = document.getElementById('configSection');
+    const modal = document.getElementById('configSection');
+    const modalContent = modal.querySelector('div');
+    const closeModal = document.getElementById('closeModal');
+    const confirmSettings = document.getElementById('confirmSettings');
+
+    function showModal(e) {
+        e.stopPropagation();
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.add('opacity-100');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function hideModal() {
+        modal.classList.remove('opacity-100');
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    closeModal.addEventListener('click', hideModal);
+    confirmSettings.addEventListener('click', hideModal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            hideModal();
+        }
+    });
+
+    const altModeToggle = document.getElementById('altModeToggle');
+    const toggleDot = document.querySelector('.toggle-dot');
+    const toggleBackground = altModeToggle.parentElement.querySelector('.w-10');
+    const urlGenerator = new UrlGenerator();
+
+    function updateToggleState(checked) {
+       
+        toggleDot.classList.toggle('translate-x-4', checked);
+        toggleBackground.classList.toggle('bg-blue-600', checked);
+        toggleBackground.classList.toggle('bg-gray-600', !checked);
+        altModeToggle.checked = checked;
+                
+        urlGenerator.altMode = checked;
+        localStorage.setItem('altModeEnabled', checked);
+
+    }
+
+    toggleBackground.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        updateToggleState(!altModeToggle.checked);
+    });
+
+    // Load saved preference
+    const savedAltMode = localStorage.getItem('altModeEnabled') === 'true';
+    updateToggleState(savedAltMode);
+
+
+    document.addEventListener('click', (e) => {
+      const configSection = document.getElementById('configSection');
+      const configToggle = document.getElementById('configToggle');
+      
+   
+      if (!configToggle.contains(e.target) && !configSection.contains(e.target)) {
+          configSection.classList.add('hidden');
+      }
+    });
+    
+    configToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        configSection.classList.toggle('hidden');
+    });
+
     try {
-      let url = `https://odin.thorscodex.com/api/AskAllFatherAISearch?query=${encodeURIComponent(
+      let url = `https://odin.thorscodex.com/api/${urlGenerator.topUrl}?query=${encodeURIComponent(
         searchInput.value
       )}&pageSize=${pageSize}`;
       
@@ -188,7 +291,7 @@ export function setupSearch(config) {
     
       const response = await fetch(url);
       
-      // Handle 404 Not Found case
+      
       if (response.status === 404) {
         resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
         paginationDiv.classList.add('hidden');
@@ -197,7 +300,6 @@ export function setupSearch(config) {
     
       const data = await response.json();
       
-      // Check if we have results
       if (!data || !data.results || data.results.length === 0) {
         resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
         paginationDiv.classList.add('hidden');
@@ -296,7 +398,7 @@ export async function loadVideoTranscripts(videoGroup) {
     loadingSpinner.classList.remove('hidden');
     transcriptContent.innerHTML = '';
 
-    const response = await fetch(`https://odin.thorscodex.com/api/AskHeimdall?videoId=${videoId}&terms=${encodeURIComponent(searchTerms)}`);
+    const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.detailsUrl}?videoId=${videoId}&terms=${encodeURIComponent(searchTerms)}`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch transcripts');
@@ -357,3 +459,47 @@ export async function loadVideoTranscripts(videoGroup) {
     loadingSpinner.classList.add('hidden');
   }
 }
+
+const modal = document.getElementById('configSection');
+const modalContent = modal.querySelector('div');
+const configToggle = document.getElementById('configToggle');
+const closeModal = document.getElementById('closeModal');
+const confirmSettings = document.getElementById('confirmSettings');
+
+
+configToggle.removeEventListener('click', showModal);
+closeModal.removeEventListener('click', hideModal);
+confirmSettings.removeEventListener('click', hideModal);
+
+function showModal(e) {
+    e.stopPropagation();
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function hideModal() {
+    modal.classList.remove('opacity-100');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+
+configToggle.addEventListener('click', showModal);
+closeModal.addEventListener('click', hideModal);
+confirmSettings.addEventListener('click', hideModal);
+
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        hideModal();
+    }
+});
+
+document.getElementById('searchButton').addEventListener('click', (e) => {
+    e.stopPropagation();
+});
