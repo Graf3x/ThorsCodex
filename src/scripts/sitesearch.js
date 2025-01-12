@@ -312,19 +312,21 @@ export async function loadVideoTranscripts(videoGroup) {
 
     // Group results by partNumber
     const groupedResults = results.reduce((acc, result) => {
-      const part = result.partNumber || 0;
-      if (!acc[part]) {
-        acc[part] = {
+      const videoId = result.videoId || 'default'; // 'default' in case videoId is missing
+      if (!acc[videoId]) {
+        acc[videoId] = {
           transcripts: [],
           summary: result.summary
         };
       }
-      acc[part].transcripts.push(result);
+      acc[videoId].transcripts.push(result);
       return acc;
     }, {});
 
+    Object.keys(groupedResults).forEach(videoId => { groupedResults[videoId].transcripts.sort((a, b) => a.partNumber - b.partNumber);
+                                                    
     transcriptContent.innerHTML = Object.entries(groupedResults)
-      .map(([part, group]) => `
+      .map(([videoId, group]) => `
         <div class="transcript-group flex gap-4 mb-2 border-b pb-4">
           <div class="transcript-content flex-1">
             ${group.transcripts.map(result => `
