@@ -2,6 +2,13 @@
 
 Thor's Codex is a project that aims to index all of Pirate Software's available VODs from YouTube and the content of the Discord channel. The project provides a search engine for the words said during these VODs, making it easier to find specific moments and information. In the future, we plan to run a local RAG and LLM to summarize large parts of the VODs. This page hosts the HTML and JavaScript to interact with the application.
 
+## Annoucements 
+  - The Full text search from Cosmos leaves some things to be desired, it's BM25 and that just doesn't work for phrases.
+  - There is a config button in the top right to allow you to use Azure's search service. Which isn't working correctly either. That is the real reason i added a configure button, because it's not as good as the already not quite what i want cosmos search.
+  - I am adding a vectorizor now... it's taking a while, there is a large chunk of data for this.
+  - Yes, i know about monogodb, i'll be looking into that next.
+
+
 ## Project Overview
 
 - **Project Name**: Thor's Codex
