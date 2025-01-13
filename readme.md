@@ -1,6 +1,6 @@
 # Thor's Codex
 
-Thor's Codex is a project that aims to index all of Pirate Software's available VODs from YouTube and the content of the Discord channel. The project provides a search engine for the words said during these VODs, making it easier to find specific moments and information. In the future, we plan to run a local RAG and LLM to summarize large parts of the VODs. This page hosts the HTML and JavaScript to interact with the application.
+Thor's Codex is a project that aims to index all of Pirate Software's available VODs from YouTube and the content of the TTS Discord channel. The project provides a search engine for the words said during these VODs, making it easier to find specific moments and information. In the future, we plan to run a local RAG and LLM to summarize large parts of the VODs. This page hosts the HTML and JavaScript to interact with the application.
 
 ## Annoucements 
   - The Full text search from Cosmos leaves some things to be desired, it's BM25 and that just doesn't work for phrases.
