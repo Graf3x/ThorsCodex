@@ -26,13 +26,10 @@ class UrlGenerator {
   }
 }
 
-
 const urlGenerator = new UrlGenerator();
 const pageSize = 10;
 let currentPage = 1;
 let currentContinuationToken = null;
-
-
 
 /**
  * Converts seconds to M:SS format
@@ -148,6 +145,7 @@ export function setupSearch(config) {
   const showMoreButton = document.getElementById('showMore');
   const errorMessage = document.getElementById('error-message');
 
+  setupConfig();
   setupTagsAnimation();
   function validateInput() {
     if (!searchInput.value.trim()) {
@@ -340,7 +338,6 @@ export async function loadVideoTranscripts(videoGroup) {
       return;
     }
 
-    // Group results by partNumber
     const groupedResults = results.reduce((acc, result) => {
       const part = result.partNumber || 0;
       if (!acc[part]) {
@@ -387,18 +384,22 @@ export async function loadVideoTranscripts(videoGroup) {
     loadingSpinner.classList.add('hidden');
   }
 }
-
+/**
+ * Configuration modal elements and state management
+ */
 const modal = document.getElementById('configSection');
 const modalContent = modal.querySelector('div');
 const configToggle = document.getElementById('configToggle');
 const closeModal = document.getElementById('closeModal');
 const confirmSettings = document.getElementById('confirmSettings');
+const altModeToggle = document.getElementById('altModeToggle');
+const toggleDot = document.querySelector('.toggle-dot');
+const toggleBackground = document.getElementById('toggle');
 
-
-configToggle.removeEventListener('click', showModal);
-closeModal.removeEventListener('click', hideModal);
-confirmSettings.removeEventListener('click', hideModal);
-
+/**
+ * Shows the configuration modal with animation
+ * @param {Event} e - Click event
+ */
 function showModal(e) {
   e.stopPropagation();
   modal.classList.remove('hidden');
@@ -408,6 +409,9 @@ function showModal(e) {
   }, 10);
 }
 
+/**
+ * Hides the configuration modal with animation
+ */
 function hideModal() {
   modal.classList.remove('opacity-100');
   modalContent.classList.remove('scale-100', 'opacity-100');
@@ -416,43 +420,44 @@ function hideModal() {
   }, 300);
 }
 
-
-const altModeToggle = document.getElementById('altModeToggle');
-const toggleDot = document.querySelector('.toggle-dot');
-const toggleBackground = document.getElementById('toggle');
-
-
+/**
+ * Updates the toggle switch state and related UI elements
+ * @param {boolean} checked - Whether the toggle is checked
+ */
 function updateToggleState(checked) {
-
-    toggleDot.style.transform = checked ? 'translateX(1rem)' : 'translateX(0)';
-  
-  if (checked) {
-    toggleBackground.classList.add('bg-blue-600');
-    toggleBackground.classList.remove('bg-gray-600');
-  }
-  else {
-    toggleBackground.classList.remove('bg-blue-600');
-    toggleBackground.classList.add('bg-gray-600');
-  }
+  toggleDot.style.transform = checked ? 'translateX(1rem)' : 'translateX(0)';
+  toggleBackground.classList.toggle('bg-blue-600', checked);
+  toggleBackground.classList.toggle('bg-gray-600', !checked);
   altModeToggle.checked = checked;
   urlGenerator.altMode = checked;
   localStorage.setItem('altModeEnabled', checked);
-
 }
 
-toggleBackground.addEventListener('click', (e) => {
+/**
+ * Initialize configuration modal and toggle switch
+ */
+export function setupConfig() {
 
-  e.preventDefault();
-  e.stopPropagation();
-  updateToggleState(!altModeToggle.checked);
-});
-
-const savedAltMode = localStorage.getItem('altModeEnabled') === 'true';
-updateToggleState(savedAltMode);
+  configToggle.removeEventListener('click', showModal);
+  closeModal.removeEventListener('click', hideModal);
+  confirmSettings.removeEventListener('click', hideModal);
 
 
-configToggle.addEventListener('click', showModal);
-closeModal.addEventListener('click', hideModal);
-confirmSettings.addEventListener('click', hideModal);
-modal.addEventListener('click', (e) => { if (e.target === modal) {hideModal();}});
-document.getElementById('searchButton').addEventListener('click', (e) => {  e.stopPropagation();});
+  configToggle.addEventListener('click', showModal);
+  closeModal.addEventListener('click', hideModal);
+  confirmSettings.addEventListener('click', hideModal);
+  
+  toggleBackground.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateToggleState(!altModeToggle.checked);
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) hideModal();
+  });
+
+  // Load saved preference
+  const savedAltMode = localStorage.getItem('altModeEnabled') === 'true';
+  updateToggleState(savedAltMode);
+}
