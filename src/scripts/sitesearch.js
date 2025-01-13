@@ -76,12 +76,26 @@ const consoleWatch = () => {
 };
 
 function setupTagsAnimation() {
+  
   const wordsSection = document.getElementById('words');
   const toggleButton = document.getElementById('toggleTags');
   const tagElements = document.querySelectorAll('#word-tags span');
-
+  const frequencies = Array.from(tagElements).map(tag =>
+    parseInt(tag.dataset.frequency, 10)
+  );
+  const minFreq = Math.min(...frequencies);
+  const maxFreq = Math.max(...frequencies);
+  const scale = (num) => {
+    return 0.75 + (
+      ((num - minFreq) / (maxFreq - minFreq)) * 1.03
+    );
+  };
 
   tagElements.forEach(tag => {
+    const freq = parseInt(tag.dataset.frequency, 10);
+    const size = scale(freq);
+    tag.style.fontSize = `${size}rem`;
+
     tag.style.cursor = 'pointer';
     tag.addEventListener('click', async () => {
       if (tag.classList.contains('disabled')) return;
@@ -113,27 +127,6 @@ function setupTagsAnimation() {
         attributeFilter: ['disabled']
       });
     });
-  });
-
-  const frequencies = Array.from(tagElements).map(tag =>
-    parseInt(tag.dataset.frequency, 10)
-  );
-
-
-  const minFreq = Math.min(...frequencies);
-  const maxFreq = Math.max(...frequencies);
-
-
-  const scale = (num) => {
-    return 0.75 + (
-      ((num - minFreq) / (maxFreq - minFreq)) * 1.03
-    );
-  };
-
-  tagElements.forEach(tag => {
-    const freq = parseInt(tag.dataset.frequency, 10);
-    const size = scale(freq);
-    tag.style.fontSize = `${size}rem`;
   });
 
   toggleButton.addEventListener('click', () => {
