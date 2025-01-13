@@ -1,5 +1,8 @@
 import { inView, animate, stagger } from "https://cdn.jsdelivr.net/npm/framer-motion@11.11.11/dom/+esm";
 
+/**
+ * UrlGenerator lets you switch between two different API endpoints
+ */
 class UrlGenerator {
   constructor(altMode = false) {
     this._altMode = altMode;
@@ -42,6 +45,7 @@ export function formatTimestamp(seconds) {
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
+
 const asciiArt = `
      ____            __ _______  __
     / ___|_ __ __ _ / _|___ /\\ \\/ /
@@ -52,7 +56,9 @@ const asciiArt = `
 Please consider contributing to the project on github!`;
 
 console.log(asciiArt);
-
+/**
+ * Some fun greeting the other devs out there :) 
+ */
 const consoleWatch = () => {
   const detectDevTools = () => {
     const widthThreshold = window.outerWidth - window.innerWidth > 160;
@@ -74,7 +80,9 @@ const consoleWatch = () => {
     }
   }, 1000);
 };
-
+/**
+ * Initialize the Browse tags and scales them based on frequency
+ */
 function setupTagsAnimation() {
   
   const wordsSection = document.getElementById('words');
@@ -336,7 +344,10 @@ export function setupSearch(config) {
     }
   }
 }
-
+ /**
+   * Proccesses the video transcripts and displays them in the UI
+   * @param {videoGroup} videoGroup - The video group element
+   */
 export async function loadVideoTranscripts(videoGroup) {
   const transcriptContainer = videoGroup.nextElementSibling;
   const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
