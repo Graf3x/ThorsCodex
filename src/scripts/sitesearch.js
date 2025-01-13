@@ -42,6 +42,38 @@ export function formatTimestamp(seconds) {
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
+const asciiArt = `
+     ____            __ _______  __
+    / ___|_ __ __ _ / _|___ /\\ \\/ /
+   | |  _| '__/ _\` | |_  |_ \\ \\  / 
+   | |_| | | | (_| |  _|___) |/  \\ 
+    \\____|_|  \\__,_|_| |____//_/\\_\\
+         Welcome Goblins!
+Please consider contributing to the project on github!`;
+
+console.log(asciiArt);
+
+const consoleWatch = () => {
+  const detectDevTools = () => {
+    const widthThreshold = window.outerWidth - window.innerWidth > 160;
+    const heightThreshold = window.outerHeight - window.innerHeight > 160;
+    return widthThreshold || heightThreshold;
+  };
+
+  let isOpen = false;
+
+  setInterval(() => {
+    const devToolsOpen = detectDevTools();
+    if (devToolsOpen && !isOpen) {
+      isOpen = true;
+      console.clear();
+      console.log('%c' + asciiArt, 'color: #082c41; font-family: monospace; font-size: 12px;');
+      console.log('%cWelcome to Thor\'s Codex!', 'color: #082c41; font-size: 20px; font-weight: bold;');
+    } else if (!devToolsOpen) {
+      isOpen = false;
+    }
+  }, 1000);
+};
 
 function setupTagsAnimation() {
   const wordsSection = document.getElementById('words');
@@ -144,7 +176,7 @@ export function setupSearch(config) {
   const paginationDiv = document.getElementById(paginationId);
   const showMoreButton = document.getElementById('showMore');
   const errorMessage = document.getElementById('error-message');
-
+  consoleWatch();
   setupConfig();
   setupTagsAnimation();
   function validateInput() {
