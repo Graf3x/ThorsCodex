@@ -467,6 +467,14 @@ function updateToggleState(checked) {
   altModeToggle.checked = checked;
   urlGenerator.altMode = checked;
   localStorage.setItem('altModeEnabled', checked);
+
+   const resultsContainer = document.getElementById('searchResults');
+   if (resultsContainer) 
+       resultsContainer.innerHTML = '';
+   
+   currentPage = 1;
+   currentContinuationToken = null;
+
 }
 
 /**
