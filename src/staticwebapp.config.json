@@ -1,6 +1,6 @@
 {
   "globalHeaders": {
-    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net *.cloudflareinsights.com unpkg.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com cdn.jsdelivr.net; font-src 'self' fonts.gstatic.com; img-src 'self' img.youtube.com data:; connect-src 'self' odin.thorscodex.com cdn.jsdelivr.net *.cloudflareinsights.com faro-collector-prod-us-west-0.grafana.net; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; manifest-src 'self'",
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net *.cloudflareinsights.com unpkg.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com cdn.jsdelivr.net; font-src 'self' fonts.gstatic.com; img-src 'self' img.youtube.com data:; connect-src 'self' odin.thorscodex.com cdn.jsdelivr.net *.cloudflareinsights.com faro-collector-prod-us-west-0.grafana.net *.grafana.net unpkg.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; manifest-src 'self'",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
