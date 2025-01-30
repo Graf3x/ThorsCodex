@@ -240,16 +240,19 @@ export function setupSearch(config) {
 
 
     try {
-      let url = `https://odin.thorscodex.com/api/${urlGenerator.topUrl}?query=${encodeURIComponent(
-        searchInput.value
-      )}&pageSize=${pageSize}`;
+      const requestBody = {
+        query: searchInput.value,
+        pageSize: pageSize,
+        ContinuationToken: currentContinuationToken
+      };
 
-      if (currentContinuationToken) {
-        url += `&continuationToken=${encodeURIComponent(currentContinuationToken)}`;
-      }
-
-      const response = await fetch(url);
-
+      const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.topUrl}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
 
       if (response.status === 404) {
         resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
@@ -265,13 +268,15 @@ export function setupSearch(config) {
         return;
       }
 
-      currentContinuationToken = data.continuationToken;
-      paginationDiv.classList.toggle('hidden', !data.continuationToken);
-      showMoreButton.disabled = !data.continuationToken;
+      // Handle continuation token directly from response
+      currentContinuationToken = data.continuationToken || null;
+      console.log('Continuation token:', currentContinuationToken);
+
+      paginationDiv.classList.toggle('hidden', !currentContinuationToken);
+      showMoreButton.disabled = !currentContinuationToken;
 
       if (!appendResults) {
         resultsContainer.innerHTML = '';
-
       }
 
       const groupedResults = data.results.reduce((groups, item) => {
@@ -360,10 +365,23 @@ export async function loadVideoTranscripts(videoGroup) {
     loadingSpinner.classList.remove('hidden');
     transcriptContent.innerHTML = '';
 
-    const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.detailsUrl}?videoId=${videoId}&terms=${encodeURIComponent(searchTerms)}`);
+    const requestBody = {
+        videoId: videoId,
+        terms: searchTerms,
+        pageSize: 100, // Default from API
+        ContinuationToken: "{sadas}" // Added required field
+    };
+
+    const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.detailsUrl}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+    });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch transcripts');
+        throw new Error('Failed to fetch transcripts');
     }
 
     const data = await response.json();
@@ -473,7 +491,7 @@ function updateToggleState(checked) {
        resultsContainer.innerHTML = '';
    
    currentPage = 1;
-   currentContinuationToken = null;
+   currentContinuationToken = "absc";
 
 }
 
