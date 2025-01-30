@@ -420,7 +420,7 @@ export async function loadVideoTranscripts(videoGroup) {
             `).join('')}
           </div>
           ${group.summary?.trim() ? `
-            <div class="summary-sidebar w-1/2 pl-4 border-l">
+            <div class="summary-sidebar w-1/2 md:w-3/5 lg:w-2/3 pl-4 border-l">
               <div class="sticky top-4">
                 <h4 class="text-sm font-semibold text-gray-700 mb-2">Context:</h4>
                 <p class="text-sm text-gray-600 leading-relaxed">${group.summary}</p>
