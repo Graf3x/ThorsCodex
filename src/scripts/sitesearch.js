@@ -504,7 +504,6 @@ export function setupConfig() {
   closeModal.removeEventListener('click', hideModal);
   confirmSettings.removeEventListener('click', hideModal);
 
-
   configToggle.addEventListener('click', showModal);
   closeModal.addEventListener('click', hideModal);
   confirmSettings.addEventListener('click', hideModal);
