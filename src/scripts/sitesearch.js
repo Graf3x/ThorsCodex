@@ -270,7 +270,6 @@ export function setupSearch(config) {
 
       // Handle continuation token directly from response
       currentContinuationToken = data.continuationToken || null;
-      console.log('Continuation token:', currentContinuationToken);
 
       paginationDiv.classList.toggle('hidden', !currentContinuationToken);
       showMoreButton.disabled = !currentContinuationToken;
