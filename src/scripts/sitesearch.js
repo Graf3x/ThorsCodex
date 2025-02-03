@@ -32,7 +32,7 @@ class UrlGenerator {
 const urlGenerator = new UrlGenerator();
 const pageSize = 10;
 let currentPage = 1;
-let currentContinuationToken = null;
+let currentContinuationToken = "";
 
 /**
  * Converts seconds to M:SS format
@@ -235,7 +235,7 @@ export function setupSearch(config) {
     if (!appendResults) {
       resultsContainer.innerHTML = '';
       currentPage = 1;
-      currentContinuationToken = null;
+      currentContinuationToken = "";
     }
 
 
@@ -269,7 +269,7 @@ export function setupSearch(config) {
       }
 
       // Handle continuation token directly from response
-      currentContinuationToken = data.continuationToken || null;
+      currentContinuationToken = data.continuationToken || "";
 
       paginationDiv.classList.toggle('hidden', !currentContinuationToken);
       showMoreButton.disabled = !currentContinuationToken;
