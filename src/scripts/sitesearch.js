@@ -369,7 +369,7 @@ export async function loadVideoTranscripts(videoGroup) {
         videoId: videoId,
         terms: searchTerms,
         pageSize: 100, // Default from API
-        ContinuationToken: "{sadas}" // Added required field
+        ContinuationToken: "" // Added required field
     };
 
     const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.detailsUrl}`, {
@@ -491,7 +491,7 @@ function updateToggleState(checked) {
        resultsContainer.innerHTML = '';
    
    currentPage = 1;
-   currentContinuationToken = "absc";
+   currentContinuationToken = "";
 
 }
 
