@@ -2,13 +2,12 @@
 
 Thor's Codex is a project that aims to index all of Pirate Software's available VODs from YouTube and the content of the TTS Discord channel. The project provides a search engine for the words said during these VODs, making it easier to find specific moments and information. In the future, we plan to run a local RAG and LLM to summarize large parts of the VODs. This page hosts the HTML and JavaScript to interact with the application.
 
-## Annoucements 
-  - The Full text search from Cosmos leaves some things to be desired, it's BM25 and that just doesn't work for phrases.
-  - There is a config button in the top right to allow you to use Azure's search service. Which isn't working correctly either. That is the real reason i added a configure button, because it's not as good as the already not quite what i want cosmos search.
-  - I am adding a vectorizor now... it's taking a while, there is a large chunk of data for this.
-  - Yes, i know about monogodb, i'll be looking into that next.
-
-
+## Updates 
+  - I have implemented Ngrams and embeded vector searching in the default search experence now. With out vectors but using NGrams and BM25 is resulting in a very good experence, albit not as fast as i would love. 
+  - I added functionality to automatically update dependencies that the data importer uses to get transcripts. This should prevent it from breaking when YT changes things on their end. It also now does a "state of the data" check and adds/removes videos as their availibitly changes. 
+  - Changed how much of the screen is used in the non-mobile views, should allow the summeries to fit better on the screen. 
+  - Moving away from the search service, mostly because i dont want to pay for something that isn't working the way it want it to. Adding a Hybrid Search endpoint that will eventually become the primary experence once i work out all of the kinks.
+  
 ## Project Overview
 
 - **Project Name**: Thor's Codex
