@@ -1,5 +1,19 @@
 import { inView, animate, stagger } from "https://cdn.jsdelivr.net/npm/framer-motion@11.11.11/dom/+esm";
 
+function getSearchParam() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('searchTerm');
+}
+
+function updateUrlWithSearch(searchTerm) {
+  const url = new URL(window.location);
+  if (searchTerm) {
+    url.searchParams.set('searchTerm', searchTerm);
+  } else {
+    url.searchParams.delete('searchTerm');
+  }
+  window.history.pushState({}, '', url);
+}
 /**
  * UrlGenerator lets you switch between two different API endpoints
  */
@@ -177,6 +191,11 @@ export function setupSearch(config) {
   const paginationDiv = document.getElementById(paginationId);
   const showMoreButton = document.getElementById('showMore');
   const errorMessage = document.getElementById('error-message');
+  const initialSearch = getSearchParam();
+  if (initialSearch) {
+    searchInput.value = decodeURIComponent(initialSearch);
+    setTimeout(function() { searchButton.click()}, 1000);
+  }
   consoleWatch();
   setupConfig();
   setupTagsAnimation();
@@ -210,8 +229,23 @@ export function setupSearch(config) {
 
   searchButton.addEventListener('click', () => {
     if (validateInput()) {
+      updateUrlWithSearch(searchInput.value);
       searchTranscripts();
     }
+
+    // Handle browser navigation
+    window.addEventListener('popstate', () => {
+      const searchTerm = getSearchParam();
+      if (searchTerm) {
+        searchInput.value = decodeURIComponent(searchTerm);
+        searchButton.click();
+      } else {
+        searchInput.value = '';
+        resultsContainer.innerHTML = '';
+      }
+    });
+
+
   });
 
   /**
