@@ -10,8 +10,8 @@ class UrlGenerator {
 
   get topUrl() {
     return this._altMode
-      ? 'AskAllFatherAISearch'
-      : 'HybridSearch';
+      ? 'HybridSearch'
+      : 'SearchAllFatherFullText';
   }
 
   get detailsUrl() {
