@@ -1,4 +1,12 @@
 import { inView, animate, stagger } from "https://cdn.jsdelivr.net/npm/framer-motion@11.11.11/dom/+esm";
+// Import Marked.js for markdown rendering
+import { marked } from "https://cdn.jsdelivr.net/npm/marked@12.0.1/lib/marked.esm.js";
+
+const apiConfig = {
+  baseUrl: window.location.hostname === 'localhost' 
+    ? 'https://odin.thorscodex.com/api'
+    : 'https://localhost:7146/api'  
+};
 
 function getSearchParam() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -44,7 +52,7 @@ class UrlGenerator {
 }
 
 const urlGenerator = new UrlGenerator();
-const pageSize = 20;
+const pageSize = 10;
 let currentPage = 1;
 let currentContinuationToken = "";
 
@@ -276,11 +284,12 @@ export function setupSearch(config) {
     try {
       const requestBody = {
         query: searchInput.value,
+        page: currentPage++, // Increment page number
         pageSize: pageSize,
         ContinuationToken: currentContinuationToken
       };
 
-      const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.topUrl}`, {
+      const response = await fetch(`${apiConfig.baseUrl}/${urlGenerator.topUrl}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -289,7 +298,7 @@ export function setupSearch(config) {
       });
 
       if (response.status === 404) {
-        resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
+        resultsContainer.insertAdjacentHTML = '<div class="text-white text-center mt-4">No results found</div>';
         paginationDiv.classList.add('hidden');
         return;
       }
@@ -297,16 +306,24 @@ export function setupSearch(config) {
       const data = await response.json();
 
       if (!data || !data.results || data.results.length === 0) {
-        resultsContainer.innerHTML = '<div class="text-white text-center mt-4">No results found</div>';
+        resultsContainer.insertAdjacentHTML = '<div class="text-white text-center mt-4">No results found</div>';
         paginationDiv.classList.add('hidden');
         return;
       }
+      
+      if (urlGenerator.altMode && data.results.length < pageSize) {
+        showMoreButton.style.display = 'none';
+      } else {
+        showMoreButton.style.display = 'block';
+        }
+
+      
 
       // Handle continuation token directly from response
       currentContinuationToken = data.continuationToken || "";
 
-      paginationDiv.classList.toggle('hidden', !currentContinuationToken);
-      showMoreButton.disabled = !currentContinuationToken;
+      paginationDiv.classList.toggle('hidden', (!currentContinuationToken && !altModeToggle.checked));
+      showMoreButton.disabled = !currentContinuationToken && !altModeToggle.checked;
 
       if (!appendResults) {
         resultsContainer.innerHTML = '';
@@ -401,11 +418,12 @@ export async function loadVideoTranscripts(videoGroup) {
     const requestBody = {
         videoId: videoId,
         terms: searchTerms,
-        pageSize: 100, // Default from API
+        page : currentPage++, // Increment page number
+        pageSize: 10, // Default from API
         ContinuationToken: "" // Added required field
     };
 
-    const response = await fetch(`https://odin.thorscodex.com/api/${urlGenerator.detailsUrl}`, {
+    const response = await fetch(`${apiConfig.baseUrl}/${urlGenerator.detailsUrl}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -437,6 +455,19 @@ export async function loadVideoTranscripts(videoGroup) {
       return acc;
     }, {});
 
+
+    const containsMarkdown = (text) => {
+      if (!text) return false;
+      return /(\*\*|__|##|>|\[.*?\]\(.*?\)|`|```|\|.*?\|)/.test(text);
+    };
+
+    const renderText = (text) => {
+      if (containsMarkdown(text)) {
+        return marked.parse(text);
+      }
+      return text;
+    };
+
     transcriptContent.innerHTML = Object.entries(groupedResults)
       .map(([part, group]) => `
         <div class="transcript-group flex gap-4 mb-2 border-b pb-4">
@@ -456,7 +487,7 @@ export async function loadVideoTranscripts(videoGroup) {
             <div class="summary-sidebar w-1/2 md:w-3/5 lg:w-2/3 pl-4 border-l">
               <div class="sticky top-4">
                 <h4 class="text-sm font-semibold text-gray-700 mb-2">Context:</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">${group.summary}</p>
+                <div class="text-sm text-gray-600 leading-relaxed markdown-content">${renderText(group.summary)}</div>
               </div>
             </div>
           ` : ''}
