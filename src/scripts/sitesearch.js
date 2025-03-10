@@ -4,8 +4,8 @@ import { marked } from "https://cdn.jsdelivr.net/npm/marked@12.0.1/lib/marked.es
 
 const apiConfig = {
   baseUrl: window.location.hostname === 'localhost' 
-    ? 'https://odin.thorscodex.com/api'
-    : 'https://localhost:7146/api'  
+    ? 'https://localhost:7146/api'
+    : 'https://odin.thorscodex.com/api'  
 };
 
 function getSearchParam() {
