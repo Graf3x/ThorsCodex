@@ -1,27 +1,5 @@
 import { inView, animate, stagger } from "https://cdn.jsdelivr.net/npm/framer-motion@11.11.11/dom/+esm";
-// Import Marked.js for markdown rendering
 import { marked } from "https://cdn.jsdelivr.net/npm/marked@12.0.1/lib/marked.esm.js";
-
-const apiConfig = {
-  baseUrl: window.location.hostname === 'localhost' 
-    ? 'https://odin.thorscodex.com/api'
-    : 'https://localhost:7146/api'  
-};
-
-function getSearchParam() {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('searchTerm');
-}
-
-function updateUrlWithSearch(searchTerm) {
-  const url = new URL(window.location);
-  if (searchTerm) {
-    url.searchParams.set('searchTerm', searchTerm);
-  } else {
-    url.searchParams.delete('searchTerm');
-  }
-  window.history.pushState({}, '', url);
-}
 /**
  * UrlGenerator lets you switch between two different API endpoints
  */
@@ -51,22 +29,16 @@ class UrlGenerator {
   }
 }
 
+const apiConfig = {
+  baseUrl: window.location.hostname === 'localhost'
+    ? 'https://odin.thorscodex.com/api'
+    : 'https://localhost:7146/api'
+};
+
 const urlGenerator = new UrlGenerator();
 const pageSize = 10;
 let currentPage = 1;
 let currentContinuationToken = "";
-
-/**
- * Converts seconds to M:SS format
- * @param {number} seconds
- * @returns {string}
- */
-export function formatTimestamp(seconds) {
-  if (!seconds && seconds !== 0) return '0:00';
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-}
 
 const asciiArt = `
      ____            __ _______  __
@@ -78,9 +50,337 @@ const asciiArt = `
 Please consider contributing to the project on github!`;
 
 console.log(asciiArt);
-/**
- * Some fun greeting the other devs out there :) 
- */
+
+function getSearchParam() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('searchTerm');
+}
+
+function updateUrlWithSearch(searchTerm) {
+  const url = new URL(window.location);
+  if (searchTerm) {
+    url.searchParams.set('searchTerm', searchTerm);
+  } else {
+    url.searchParams.delete('searchTerm');
+  }
+  window.history.pushState({}, '', url);
+}
+
+export function formatTimestamp(seconds) {
+  if (!seconds && seconds !== 0) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+async function loadScreenshotsTimeline(videoId, container) {
+  const videoGroup = container.closest('.bg-white').querySelector('.video-group');
+  const transcriptContainer = container.closest('.transcript-container');
+  const timelineButton = transcriptContainer.querySelector('.btn-timeline');
+  const transcriptContent = transcriptContainer.querySelector('.transcript-content');
+
+  timelineButton.innerText = 'Loading Screenshots...';
+
+  try {
+    let partNumbers = [];
+    if (videoGroup.dataset.partNumbers) {
+      partNumbers = JSON.parse(videoGroup.dataset.partNumbers);
+    }
+
+    if (!partNumbers.length) {
+      const maxSegments = 6;
+      for (let seg = 0; seg < maxSegments; seg++) {
+        for (let i = 1; i <= 6; i++) {
+          partNumbers.push(seg * 6 + i);
+        }
+      }
+    }
+
+    const response = await fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ VideoId: videoId, PartNumbers: partNumbers })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to load screenshots');
+    }
+
+    const screenshots = await response.json();
+
+    const screenshotsByPart = screenshots.reduce((acc, screenshot) => {
+      if (!acc[screenshot.partNumber]) {
+        acc[screenshot.partNumber] = [];
+      }
+      acc[screenshot.partNumber].push(screenshot);
+      return acc;
+    }, {});
+
+    for (const partNumber in screenshotsByPart) {
+      const container = transcriptContent.querySelector(`[data-part="${partNumber}"] .screenshot-container`);
+      if (container) {
+        const sortedScreenshots = screenshotsByPart[partNumber].sort(
+          (a, b) => a.timestampSeconds - b.timestampSeconds
+        );
+
+        if (sortedScreenshots.length > 0) {
+          container.querySelectorAll('.placeholder').forEach(el => el.remove());
+
+          const firstTranscriptTimestamp = parseInt(container.dataset.firstTimestamp, 10) || 0;
+
+          let closestScreenshotIndex = 0;
+          let minTimeDiff = Infinity;
+
+          sortedScreenshots.forEach((screenshot, index) => {
+            const timeDiff = Math.abs(screenshot.timestampSeconds - firstTranscriptTimestamp);
+            if (timeDiff < minTimeDiff) {
+              minTimeDiff = timeDiff;
+              closestScreenshotIndex = index;
+            }
+
+          });
+
+          const screenshotsHtml = sortedScreenshots.map((screenshot, index) => `
+            <div class="mb-1 screenshot-item inline-block md:block md:mr-0 flex-shrink-0 w-28 md:w-auto ${index === closestScreenshotIndex ? 'border-l-4 border-blue-500 pl-2' : ''}">
+              <div class="relative">
+                <a href="https://www.youtube.com/watch?v=${videoId}&t=${screenshot.timestampSeconds}s" target="_blank">
+                  <img 
+                    src="data:image/png;base64,${screenshot.imageData}" 
+                    alt="Screenshot at ${formatTimestamp(screenshot.timestampSeconds)}"
+                    class="rounded-md border border-gray-300 w-full h-auto"
+                  />
+               </a>
+                <div class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-md">
+                  ${formatTimestamp(screenshot.timestampSeconds)}
+                </div>
+              </div>
+            </div>
+          `).join('');
+
+          container.innerHTML = screenshotsHtml;
+
+          if (closestScreenshotIndex > 0) {
+            const matchingScreenshot = container.querySelectorAll('.screenshot-item')[closestScreenshotIndex];
+            if (matchingScreenshot) {
+              setTimeout(() => {
+                container.scrollTo({ top: matchingScreenshot.offsetTop, behavior: 'smooth' });
+              }, 100);
+            }
+          }
+        } else {
+          container.innerHTML = `<div class="text-sm text-gray-500">No screenshots available</div>`;
+        }
+      }
+    }
+
+    timelineButton.dataset.loaded = 'true';
+
+  } catch (err) {
+    console.error('Error loading timeline:', err);
+    timelineButton.innerText = 'Retry Loading Screenshots';
+
+    const containers = transcriptContent.querySelectorAll('.screenshot-container');
+    containers.forEach(container => {
+      container.innerHTML = '<div class="text-sm text-red-500">Failed to load screenshots</div>';
+    });
+  }
+}
+
+async function loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers) {
+  try {
+    const response = await fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ VideoId: videoId, PartNumbers: partNumbers })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to load screenshots');
+    }
+
+    const screenshots = await response.json();
+
+    const screenshotsByPart = screenshots.reduce((acc, screenshot) => {
+      if (!acc[screenshot.partNumber]) {
+        acc[screenshot.partNumber] = [];
+      }
+      acc[screenshot.partNumber].push(screenshot);
+      return acc;
+    }, {});
+    for (const partNumber in screenshotsByPart) {
+      const container = transcriptContent.querySelector(`[data-part="${partNumber}"] .screenshot-container`);
+      if (container) {
+
+        const transcriptGroup = container.closest('.transcript-group');
+        const transcriptContentContainer = transcriptGroup.querySelector('.transcript-content > .py-2');
+        const summarySidebar = transcriptGroup.querySelector('.summary-sidebar > .sticky');
+
+        const transcriptHeight = transcriptContentContainer.clientHeight;
+        const summaryHeight = summarySidebar ? summarySidebar.clientHeight : 0;
+
+        let maxHeight = Math.max(transcriptHeight, summaryHeight) - 10;
+        container.style.maxHeight = maxHeight + 'px';
+
+        await loadScreenshotsTimeline(videoId, container);
+        const sortedScreenshots = screenshotsByPart[partNumber].sort(
+          (a, b) => a.timestampSeconds - b.timestampSeconds
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Error loading screenshots:', error);
+    const containers = transcriptContent.querySelectorAll('.screenshot-container');
+    containers.forEach(container => {
+      const placeholders = container.querySelectorAll('.screenshot-item.placeholder');
+      placeholders.forEach(placeholder => {
+        placeholder.insertAdjacentHTML('beforeend', '<div class="text-sm text-red-500 mt-2">Failed to load screenshot</div>');
+      });
+    });
+  }
+}
+
+export async function loadVideoTranscripts(videoGroup) {
+  const transcriptContainer = videoGroup.nextElementSibling;
+  const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
+  const transcriptContent = transcriptContainer.querySelector('.transcript-content');
+  const timelineButton = transcriptContainer.querySelector('.btn-timeline');
+  const screenshotsTimeline = transcriptContainer.querySelector('.screenshots-timeline');
+
+  timelineButton.classList.add('hidden');
+  screenshotsTimeline.classList.add('hidden');
+
+  const videoId = videoGroup.dataset.videoId;
+  const searchTerms = decodeURIComponent(videoGroup.dataset.searchTerms);
+  const thumbnailUrl = videoGroup.querySelector('img').src;
+
+  try {
+    loadingSpinner.classList.remove('hidden');
+    transcriptContent.innerHTML = '';
+
+    const requestBody = {
+      videoId: videoId,
+      terms: searchTerms,
+      page: currentPage++,
+      pageSize: 10,
+      ContinuationToken: ""
+    };
+
+    const response = await fetch(`${apiConfig.baseUrl}/${urlGenerator.detailsUrl}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch transcripts');
+    }
+
+    const data = await response.json();
+    const results = data.results || [];
+
+    if (results.length === 0) {
+      transcriptContent.innerHTML = '<p class="text-gray-500">No transcripts found</p>';
+      return;
+    }
+
+    const groupedResults = results.reduce((acc, result) => {
+      const part = result.partNumber || 0;
+      if (!acc[part]) {
+        acc[part] = {
+          transcripts: [],
+          summary: result.summary
+        };
+      }
+      acc[part].transcripts.push(result);
+      return acc;
+    }, {});
+
+    const partNumbers = Object.keys(groupedResults).map(Number);
+    videoGroup.dataset.partNumbers = JSON.stringify(partNumbers);
+
+    const containsMarkdown = (text) => {
+      if (!text) return false;
+      return /(\*\*|__|##|>|\[.*?\]\(.*?\)|`|```|\|.*?\|)/.test(text);
+    };
+
+    const renderText = (text) => {
+      if (containsMarkdown(text)) {
+        return marked.parse(text);
+      }
+      return text;
+    };
+
+    transcriptContent.innerHTML = Object.entries(groupedResults)
+      .map(([part, group]) => {
+        const firstTranscriptTimestamp = group.transcripts[0]?.timestampSeconds || 0;
+
+        const placeholderHtml = Array(3).fill()
+          .map((_, i) => `
+          <div class="mb-1 screenshot-item placeholder">
+            <div class="relative">
+              <img 
+                src="${thumbnailUrl}" 
+                alt="Loading screenshot placeholder"
+                class="rounded-md border border-gray-300 w-full h-auto filter grayscale opacity-40"
+              />
+              <div class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-md">
+                --:--
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        return `
+        <div class="transcript-group mb-4 border-b pb-4" data-part="${part}">
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="screenshot-container md:w-1/6 lg:w-1/6 overflow-y-auto overflow-x-hidden scrollbar-hide" ce-nowrap md:whitespace-normal overflow-y-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide" 
+                 id="screenshot-part-${part}" style="max-height: 3rem"
+                 data-first-timestamp="${firstTranscriptTimestamp}">
+              ${placeholderHtml}
+            </div>
+            <div class="flex-1 flex gap-4">
+              <div class="transcript-content w-1/2">
+                ${group.transcripts.map(result => `
+                  <div class="py-2">
+                    <p class="text-gray-600">${result.text}</p>
+                    <a href="${result.videoUrlWithTimestamp}" 
+                       target="_blank"
+                       class="text-sm text-blue-500 hover:text-blue-700">
+                      Watch at ${formatTimestamp(result.timestampSeconds)}
+                    </a>
+                  </div>
+                `).join('')}
+              </div>
+              ${group.summary?.trim() ? `
+                <div class="summary-sidebar w-1/2 pl-4 border-l">
+                  <div class="sticky top-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Context:</h4>
+                    <div class="text-sm text-gray-600 leading-relaxed markdown-content">${renderText(group.summary)}</div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+
+    try {
+      await loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers);
+
+    } catch (screenshotError) {
+      console.error('Error loading screenshots:', screenshotError);
+    }
+  } catch (error) {
+    console.error('Error loading transcripts:', error);
+    transcriptContent.innerHTML = '<p class="text-red-500">Error loading transcripts</p>';
+  } finally {
+    loadingSpinner.classList.add('hidden');
+  }
+}
+
 const consoleWatch = () => {
   const detectDevTools = () => {
     const widthThreshold = window.outerWidth - window.innerWidth > 160;
@@ -101,12 +401,10 @@ const consoleWatch = () => {
       isOpen = false;
     }
   }, 1000);
-};
-/**
- * Initialize the Browse tags and scales them based on frequency
- */
+}
+
 function setupTagsAnimation() {
-  
+
   const wordsSection = document.getElementById('words');
   const toggleButton = document.getElementById('toggleTags');
   const tagElements = document.querySelectorAll('#word-tags span');
@@ -179,10 +477,73 @@ function setupTagsAnimation() {
   });
 }
 
-/**
- * Initializes the search functionality.
- * @param {Object} config - Configuration with element IDs
- */
+const modal = document.getElementById('configSection');
+const modalContent = modal.querySelector('div');
+const configToggle = document.getElementById('configToggle');
+const closeModal = document.getElementById('closeModal');
+const confirmSettings = document.getElementById('confirmSettings');
+const altModeToggle = document.getElementById('altModeToggle');
+const toggleDot = document.querySelector('.toggle-dot');
+const toggleBackground = document.getElementById('toggle');
+
+function showModal(e) {
+  e.stopPropagation();
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    modal.classList.add('opacity-100');
+    modalContent.classList.add('scale-100', 'opacity-100');
+  }, 10);
+}
+
+function hideModal() {
+  modal.classList.remove('opacity-100');
+  modalContent.classList.remove('scale-100', 'opacity-100');
+  setTimeout(() => {
+    modal.classList.add('hidden');
+  }, 300);
+}
+
+function updateToggleState(checked) {
+  toggleDot.style.transform = checked ? 'translateX(1rem)' : 'translateX(0)';
+  toggleBackground.classList.toggle('bg-blue-600', checked);
+  toggleBackground.classList.toggle('bg-gray-600', !checked);
+  altModeToggle.checked = checked;
+  urlGenerator.altMode = checked;
+  localStorage.setItem('altModeEnabled', checked);
+
+  const resultsContainer = document.getElementById('searchResults');
+  if (resultsContainer)
+    resultsContainer.innerHTML = '';
+
+  currentPage = 1;
+  currentContinuationToken = "";
+
+}
+
+export function setupConfig() {
+
+  configToggle.removeEventListener('click', showModal);
+  closeModal.removeEventListener('click', hideModal);
+  confirmSettings.removeEventListener('click', hideModal);
+
+  configToggle.addEventListener('click', showModal);
+  closeModal.addEventListener('click', hideModal);
+  confirmSettings.addEventListener('click', hideModal);
+
+  toggleBackground.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateToggleState(!altModeToggle.checked);
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) hideModal();
+  });
+
+  const savedAltMode = localStorage.getItem('altModeEnabled') === 'true';
+  updateToggleState(savedAltMode);
+}
+
 export function setupSearch(config) {
   const {
     inputId,
@@ -202,7 +563,7 @@ export function setupSearch(config) {
   const initialSearch = getSearchParam();
   if (initialSearch) {
     searchInput.value = decodeURIComponent(initialSearch);
-    setTimeout(function() { searchButton.click()}, 1000);
+    setTimeout(function () { searchButton.click() }, 1000);
   }
   consoleWatch();
   setupConfig();
@@ -241,7 +602,6 @@ export function setupSearch(config) {
       searchTranscripts();
     }
 
-    // Handle browser navigation
     window.addEventListener('popstate', () => {
       const searchTerm = getSearchParam();
       if (searchTerm) {
@@ -252,14 +612,8 @@ export function setupSearch(config) {
         resultsContainer.innerHTML = '';
       }
     });
-
-
   });
 
-  /**
-   * Performs the actual search and updates UI elements.
-   * @param {number} page - Page number to query
-   */
   async function searchTranscripts(appendResults = false) {
     searchInput.disabled = true;
     searchButton.disabled = true;
@@ -284,7 +638,7 @@ export function setupSearch(config) {
     try {
       const requestBody = {
         query: searchInput.value,
-        page: currentPage++, // Increment page number
+        page: currentPage++,
         pageSize: pageSize,
         ContinuationToken: currentContinuationToken
       };
@@ -310,16 +664,13 @@ export function setupSearch(config) {
         paginationDiv.classList.add('hidden');
         return;
       }
-      
+
       if (urlGenerator.altMode && data.results.length < pageSize) {
         showMoreButton.style.display = 'none';
       } else {
         showMoreButton.style.display = 'block';
-        }
+      }
 
-      
-
-      // Handle continuation token directly from response
       currentContinuationToken = data.continuationToken || "";
 
       paginationDiv.classList.toggle('hidden', (!currentContinuationToken && !altModeToggle.checked));
@@ -358,7 +709,9 @@ export function setupSearch(config) {
             </div>
           </div>
           <div class="hidden mt-4 pl-4 border-l-2 border-gray-200 transcript-container">
-            <div class="loading-spinner hidden">Loading transcripts...</div>
+            <button class="btn-timeline">Show Timeline</button>
+            <div class="screenshots-timeline"></div>
+            <div class="loading-spinner hidden"></div>
             <div class="transcript-content"></div>
           </div>
         `;
@@ -386,6 +739,14 @@ export function setupSearch(config) {
             loadVideoTranscripts(videoGroup);
           }
         });
+
+        const timelineButton = groupElement.querySelector('.btn-timeline');
+        const timelineContainer = groupElement.querySelector('.screenshots-timeline');
+        timelineButton.addEventListener('click', async () => {
+          timelineButton.innerText = 'Loading Timeline...';
+          await loadScreenshotsTimeline(videoId, timelineContainer);
+          timelineButton.innerText = 'Show Timeline';
+        });
       });
     } catch (err) {
       console.error(err);
@@ -398,191 +759,4 @@ export function setupSearch(config) {
       spinner.style.display = 'none';
     }
   }
-}
- /**
-   * Proccesses the video transcripts and displays them in the UI
-   * @param {videoGroup} videoGroup - The video group element
-   */
-export async function loadVideoTranscripts(videoGroup) {
-  const transcriptContainer = videoGroup.nextElementSibling;
-  const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
-  const transcriptContent = transcriptContainer.querySelector('.transcript-content');
-
-  const videoId = videoGroup.dataset.videoId;
-  const searchTerms = decodeURIComponent(videoGroup.dataset.searchTerms);
-
-  try {
-    loadingSpinner.classList.remove('hidden');
-    transcriptContent.innerHTML = '';
-
-    const requestBody = {
-        videoId: videoId,
-        terms: searchTerms,
-        page : currentPage++, // Increment page number
-        pageSize: 10, // Default from API
-        ContinuationToken: "" // Added required field
-    };
-
-    const response = await fetch(`${apiConfig.baseUrl}/${urlGenerator.detailsUrl}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch transcripts');
-    }
-
-    const data = await response.json();
-    const results = data.results || [];
-
-    if (results.length === 0) {
-      transcriptContent.innerHTML = '<p class="text-gray-500">No transcripts found</p>';
-      return;
-    }
-
-    const groupedResults = results.reduce((acc, result) => {
-      const part = result.partNumber || 0;
-      if (!acc[part]) {
-        acc[part] = {
-          transcripts: [],
-          summary: result.summary
-        };
-      }
-      acc[part].transcripts.push(result);
-      return acc;
-    }, {});
-
-
-    const containsMarkdown = (text) => {
-      if (!text) return false;
-      return /(\*\*|__|##|>|\[.*?\]\(.*?\)|`|```|\|.*?\|)/.test(text);
-    };
-
-    const renderText = (text) => {
-      if (containsMarkdown(text)) {
-        return marked.parse(text);
-      }
-      return text;
-    };
-
-    transcriptContent.innerHTML = Object.entries(groupedResults)
-      .map(([part, group]) => `
-        <div class="transcript-group flex gap-4 mb-2 border-b pb-4">
-          <div class="transcript-content flex-1">
-            ${group.transcripts.map(result => `
-              <div class="py-2">
-                <p class="text-gray-600">${result.text}</p>
-                <a href="${result.videoUrlWithTimestamp}" 
-                   target="_blank"
-                   class="text-sm text-blue-500 hover:text-blue-700">
-                  Watch at ${formatTimestamp(result.timestampSeconds)}
-                </a>
-              </div>
-            `).join('')}
-          </div>
-          ${group.summary?.trim() ? `
-            <div class="summary-sidebar w-1/2 md:w-3/5 lg:w-2/3 pl-4 border-l">
-              <div class="sticky top-4">
-                <h4 class="text-sm font-semibold text-gray-700 mb-2">Context:</h4>
-                <div class="text-sm text-gray-600 leading-relaxed markdown-content">${renderText(group.summary)}</div>
-              </div>
-            </div>
-          ` : ''}
-        </div>
-      `).join('');
-
-
-  } catch (error) {
-    console.error('Error loading transcripts:', error);
-    transcriptContent.innerHTML = '<p class="text-red-500">Error loading transcripts</p>';
-  } finally {
-    loadingSpinner.classList.add('hidden');
-  }
-}
-/**
- * Configuration modal elements and state management
- */
-const modal = document.getElementById('configSection');
-const modalContent = modal.querySelector('div');
-const configToggle = document.getElementById('configToggle');
-const closeModal = document.getElementById('closeModal');
-const confirmSettings = document.getElementById('confirmSettings');
-const altModeToggle = document.getElementById('altModeToggle');
-const toggleDot = document.querySelector('.toggle-dot');
-const toggleBackground = document.getElementById('toggle');
-
-/**
- * Shows the configuration modal with animation
- * @param {Event} e - Click event
- */
-function showModal(e) {
-  e.stopPropagation();
-  modal.classList.remove('hidden');
-  setTimeout(() => {
-    modal.classList.add('opacity-100');
-    modalContent.classList.add('scale-100', 'opacity-100');
-  }, 10);
-}
-
-/**
- * Hides the configuration modal with animation
- */
-function hideModal() {
-  modal.classList.remove('opacity-100');
-  modalContent.classList.remove('scale-100', 'opacity-100');
-  setTimeout(() => {
-    modal.classList.add('hidden');
-  }, 300);
-}
-
-/**
- * Updates the toggle switch state and related UI elements
- * @param {boolean} checked - Whether the toggle is checked
- */
-function updateToggleState(checked) {
-  toggleDot.style.transform = checked ? 'translateX(1rem)' : 'translateX(0)';
-  toggleBackground.classList.toggle('bg-blue-600', checked);
-  toggleBackground.classList.toggle('bg-gray-600', !checked);
-  altModeToggle.checked = checked;
-  urlGenerator.altMode = checked;
-  localStorage.setItem('altModeEnabled', checked);
-
-   const resultsContainer = document.getElementById('searchResults');
-   if (resultsContainer) 
-       resultsContainer.innerHTML = '';
-   
-   currentPage = 1;
-   currentContinuationToken = "";
-
-}
-
-/**
- * Initialize configuration modal and toggle switch
- */
-export function setupConfig() {
-
-  configToggle.removeEventListener('click', showModal);
-  closeModal.removeEventListener('click', hideModal);
-  confirmSettings.removeEventListener('click', hideModal);
-
-  configToggle.addEventListener('click', showModal);
-  closeModal.addEventListener('click', hideModal);
-  confirmSettings.addEventListener('click', hideModal);
-  
-  toggleBackground.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    updateToggleState(!altModeToggle.checked);
-  });
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) hideModal();
-  });
-
-  // Load saved preference
-  const savedAltMode = localStorage.getItem('altModeEnabled') === 'true';
-  updateToggleState(savedAltMode);
 }

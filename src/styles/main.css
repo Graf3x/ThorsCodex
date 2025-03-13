@@ -20,6 +20,23 @@ body {
   overflow-y: auto;
 }
 
+/* Mobile screenshot layout styles */
+@media (max-width: 768px) {
+  .screenshot-container {
+    padding-bottom: 0.5rem;
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .screenshot-item {
+    height: auto;
+    margin: 0 0.25rem;
+  }
+}
+
 #words {
   transition: opacity 0.3s ease-out;
 }
@@ -33,6 +50,37 @@ body {
   flex-shrink: 0;
 }
 
+.scrollbar-hide {
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; 
+}
+
+.heimdall-timeline {
+  background-color: #f9fafb;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.heimdall-timeline .vis-item {
+  border-color: #3b82f6;
+  background-color: #dbeafe;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.heimdall-timeline .vis-item.vis-selected {
+  border-color: #1d4ed8;
+  background-color: #bfdbfe;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.heimdall-timeline .vis-time-axis .vis-text {
+  font-size: 10px;
+  color: #4b5563;
+}
 .bmc-btn {
   min-width: 210px;
   color: #ffffff;
