@@ -31,8 +31,8 @@ class UrlGenerator {
 
 const apiConfig = {
   baseUrl: window.location.hostname === 'localhost'
-    ? 'https://odin.thorscodex.com/api'
-    : 'https://localhost:7146/api'
+    ? 'https://localhost:7146/api'
+    : 'https://odin.thorscodex.com/api'
 };
 
 const urlGenerator = new UrlGenerator();
