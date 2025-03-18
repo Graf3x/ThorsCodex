@@ -141,7 +141,7 @@ async function loadScreenshotsTimeline(videoId, container) {
           });
 
           const screenshotsHtml = sortedScreenshots.map((screenshot, index) => `
-            <div class="mb-1 screenshot-item inline-block md:block md:mr-0 flex-shrink-0 w-28 md:w-auto ${index === closestScreenshotIndex ? 'border-l-4 border-blue-500 pl-2' : ''}">
+            <div class="mb-1 screenshot-item inline-block md:block md:mr-0 flex-shrink-0 w-28 md:w-auto ${index === closestScreenshotIndex ? 'border-l-4 border-blue-500' : ''}">
               <div class="relative">
                 <a href="https://www.youtube.com/watch?v=${videoId}&t=${screenshot.timestampSeconds}s" target="_blank">
                   <img 
@@ -336,7 +336,7 @@ export async function loadVideoTranscripts(videoGroup) {
         <div class="transcript-group mb-4 border-b pb-4" data-part="${part}">
           <div class="flex flex-col md:flex-row gap-4">
             <div class="screenshot-container md:w-1/6 lg:w-1/6 overflow-y-auto overflow-x-hidden scrollbar-hide" ce-nowrap md:whitespace-normal overflow-y-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide" 
-                 id="screenshot-part-${part}" style="max-height: 3rem"
+                 id="screenshot-part-${part}" style="max-height: 450px"
                  data-first-timestamp="${firstTranscriptTimestamp}">
               ${placeholderHtml}
             </div>
@@ -483,8 +483,8 @@ const configToggle = document.getElementById('configToggle');
 const closeModal = document.getElementById('closeModal');
 const confirmSettings = document.getElementById('confirmSettings');
 const altModeToggle = document.getElementById('altModeToggle');
-const toggleDot = document.querySelector('.toggle-dot');
-const toggleBackground = document.getElementById('toggle');
+const toggleSearchService = document.getElementById('toggle');
+const timelineToggle = document.getElementById('toggle-timeline');
 
 function showModal(e) {
   e.stopPropagation();
@@ -500,13 +500,14 @@ function hideModal() {
   modalContent.classList.remove('scale-100', 'opacity-100');
   setTimeout(() => {
     modal.classList.add('hidden');
-  }, 300);
+  }, 100);
 }
 
 function updateToggleState(checked) {
+  const toggleDot = document.querySelector('#toggle > div.toggle-dot');
   toggleDot.style.transform = checked ? 'translateX(1rem)' : 'translateX(0)';
-  toggleBackground.classList.toggle('bg-blue-600', checked);
-  toggleBackground.classList.toggle('bg-gray-600', !checked);
+  toggleSearchService.classList.toggle('bg-blue-600', checked);
+  toggleSearchService.classList.toggle('bg-gray-600', !checked);
   altModeToggle.checked = checked;
   urlGenerator.altMode = checked;
   localStorage.setItem('altModeEnabled', checked);
@@ -517,23 +518,34 @@ function updateToggleState(checked) {
 
   currentPage = 1;
   currentContinuationToken = "";
+}
 
+function updateTimelineToggleState(checked) {
+  document.getElementById('timelineToggleInput').checked = checked;
+  const toggleDot = document.querySelector('#toggle-timeline > div.toggle-dot');
+  toggleDot.style.transform = checked ? 'translateX(1rem)' : 'translateX(0)';
+  timelineToggle.classList.toggle('bg-blue-600', checked);
+  timelineToggle.classList.toggle('bg-gray-600', !checked);
+  localStorage.setItem('timelineToggle', checked);
 }
 
 export function setupConfig() {
-
-  configToggle.removeEventListener('click', showModal);
-  closeModal.removeEventListener('click', hideModal);
-  confirmSettings.removeEventListener('click', hideModal);
 
   configToggle.addEventListener('click', showModal);
   closeModal.addEventListener('click', hideModal);
   confirmSettings.addEventListener('click', hideModal);
 
-  toggleBackground.addEventListener('click', (e) => {
+  toggleSearchService.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     updateToggleState(!altModeToggle.checked);
+  });
+
+  timelineToggle.addEventListener('click', (e) => {
+    let timelineToggleInput = document.getElementById('timelineToggleInput');
+    e.preventDefault();
+    e.stopPropagation();
+    updateTimelineToggleState(!timelineToggleInput.checked);
   });
 
   modal.addEventListener('click', (e) => {
@@ -585,6 +597,8 @@ export function setupSearch(config) {
     }
     return true;
   }
+  
+  
   showMoreButton.addEventListener('click', () => {
     showMoreButton.innerText = 'Loading...';
     searchTranscripts(true);
