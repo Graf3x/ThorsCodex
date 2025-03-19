@@ -149,7 +149,9 @@ flex-shrink: 0;
   -webkit-background-clip: text;
   background-clip: text;
 }
-
+.hidden {
+  display: none !important;
+}
 .spinner {
   position: fixed;
   left: 48%;
