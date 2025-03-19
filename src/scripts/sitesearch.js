@@ -158,6 +158,8 @@ async function loadScreenshotsTimeline(videoId, container) {
           `).join('');
 
           container.innerHTML = screenshotsHtml;
+          // Show the container now that images are loaded
+          container.classList.remove('hidden');
 
           if (closestScreenshotIndex > 0) {
             const matchingScreenshot = container.querySelectorAll('.screenshot-item')[closestScreenshotIndex];
@@ -169,6 +171,8 @@ async function loadScreenshotsTimeline(videoId, container) {
           }
         } else {
           container.innerHTML = `<div class="text-sm text-gray-500">No screenshots available</div>`;
+          // Show the container even if there are no screenshots, but with a message
+          container.classList.remove('hidden');
         }
       }
     }
@@ -182,12 +186,20 @@ async function loadScreenshotsTimeline(videoId, container) {
     const containers = transcriptContent.querySelectorAll('.screenshot-container');
     containers.forEach(container => {
       container.innerHTML = '<div class="text-sm text-red-500">Failed to load screenshots</div>';
+      // Show containers with error message
+      container.classList.remove('hidden');
     });
   }
 }
 
 async function loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers) {
   try {
+    // Initially hide all screenshot containers
+    const allContainers = transcriptContent.querySelectorAll('.screenshot-container');
+    allContainers.forEach(container => {
+      container.classList.add('hidden');
+    });
+
     const response = await fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -235,6 +247,8 @@ async function loadScreenshotsForTranscript(videoId, transcriptContent, partNumb
       placeholders.forEach(placeholder => {
         placeholder.insertAdjacentHTML('beforeend', '<div class="text-sm text-red-500 mt-2">Failed to load screenshot</div>');
       });
+      // Show containers with error message
+      container.classList.remove('hidden');
     });
   }
 }
@@ -335,7 +349,7 @@ export async function loadVideoTranscripts(videoGroup) {
         return `
         <div class="transcript-group mb-4 border-b pb-4" data-part="${part}">
           <div class="flex flex-col md:flex-row gap-4">
-            <div class="screenshot-container md:w-1/6 lg:w-1/6 overflow-y-auto overflow-x-hidden scrollbar-hide" ce-nowrap md:whitespace-normal overflow-y-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide" 
+            <div class="screenshot-container hidden md:w-1/6 lg:w-1/6 overflow-y-auto overflow-x-hidden scrollbar-hide" ce-nowrap md:whitespace-normal overflow-y-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide" 
                  id="screenshot-part-${part}" style="max-height: 450px"
                  data-first-timestamp="${firstTranscriptTimestamp}">
               ${placeholderHtml}
