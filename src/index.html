@@ -18,7 +18,7 @@
   <main class="flex-grow flex flex-col items-center justify-center w-full">
     <div class="flex flex-col items-center w-full gap-4">
       <div class="fixed top-4 right-4 z-50">
-        <button id="configToggle" class="p-2 text-gray-300 hover:text-white transition-colors">
+        <button id="configToggle" class="p-2 text-gray-300 hover:text-white transition-colors" title="Settings">  
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -28,7 +28,7 @@
           <div class="relative bg-gray-800 rounded-lg w-96 transform transition-all duration-300 scale-95 opacity-0">
             <div class="flex justify-between items-center p-4 border-b border-gray-700">
               <h3 class="text-lg font-medium text-white">Settings</h3>
-              <button id="closeModal" class="text-gray-400 hover:text-white transition-colors">
+              <button id="closeModal" class="text-gray-400 hover:text-white transition-colors" title="Close">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -45,9 +45,9 @@
             </div>
             <div class="p-4">
               <label class="flex items-center gap-2 cursor-pointer text-white">
-                <input type="checkbox" id="altModeToggle" class="hidden">
-                <div id="toggle" class="w-10 h-6 bg-gray-600 rounded-full p-1 flex">
-                  <div class="toggle-dot w-4 h-4 bg-white rounded-full transition-transform"></div>
+                <input type="checkbox" id="altModeToggle" class="hidden" disabled>
+                <div id="toggle" class="w-10 h-6 bg-gray-600 rounded-full p-1 flex ">
+                  <div class="toggle-dot w-4 h-4 bg-white rounded-full transition-transform "></div>
                 </div>
                 <span>Use Search Service (Fast, but janky)</span>
               </label>
@@ -140,6 +140,7 @@
     <div class="flex flex-col md:flex-row justify-center py-4 md:py-0 items-center gap-6 pb-4">
       <a href="https://github.com/Graf3x/ThorsCodex" 
          target="_blank"
+          rel="noopener noreferrer"
          class="text-white hover:text-gray-300 flex items-center gap-2 ">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
@@ -147,7 +148,7 @@
         <span>View on GitHub</span>
       </a>
       <div id="bmac" class="min-h-[215px]">
-    <div class="bmc-btn-container"><a class="bmc-btn" target="_blank" href="https://buymeacoffee.com/joshp"><svg viewBox="0 0 884 1279" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="bmc-btn-container"><a class="bmc-btn" rel="noopener" target="_blank" href="https://buymeacoffee.com/joshp"><svg viewBox="0 0 884 1279" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M791.109 297.518L790.231 297.002L788.201 296.383C789.018 297.072 790.04 297.472 791.109 297.518Z" fill="#0D0C22"></path>
           <path d="M803.896 388.891L802.916 389.166L803.896 388.891Z" fill="#0D0C22"></path>
           <path d="M791.484 297.377C791.359 297.361 791.237 297.332 791.118 297.29C791.111 297.371 791.111 297.453 791.118 297.534C791.252 297.516 791.379 297.462 791.484 297.377Z" fill="#0D0C22"></path>

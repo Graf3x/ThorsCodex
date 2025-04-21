@@ -73,26 +73,8 @@ export function formatTimestamp(seconds) {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-async function loadScreenshotsTimeline(videoId, container) {
-  const videoGroup = container.closest('.bg-white').querySelector('.video-group');
-  const transcriptContainer = container.closest('.transcript-container');
-  const transcriptContent = transcriptContainer.querySelector('.transcript-content');
-
+async function loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers) {
   try {
-    let partNumbers = [];
-    if (videoGroup.dataset.partNumbers) {
-      partNumbers = JSON.parse(videoGroup.dataset.partNumbers);
-    }
-
-    if (!partNumbers.length) {
-      const maxSegments = 6;
-      for (let seg = 0; seg < maxSegments; seg++) {
-        for (let i = 1; i <= 6; i++) {
-          partNumbers.push(seg * 6 + i);
-        }
-      }
-    }
-
     const response = await fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -134,7 +116,6 @@ async function loadScreenshotsTimeline(videoId, container) {
               minTimeDiff = timeDiff;
               closestScreenshotIndex = index;
             }
-
           });
 
           const screenshotsHtml = sortedScreenshots.map((screenshot, index) => `
@@ -155,84 +136,24 @@ async function loadScreenshotsTimeline(videoId, container) {
           `).join('');
 
           container.innerHTML = screenshotsHtml;
-          container.classList.remove('hidden');
+
+          const transcriptGroup = container.closest('.transcript-group');
+          let maxHeight = transcriptGroup.clientHeight - 10;
+          container.style.maxHeight = maxHeight + 'px';
 
           if (closestScreenshotIndex > 0) {
             const matchingScreenshot = container.querySelectorAll('.screenshot-item')[closestScreenshotIndex];
             if (matchingScreenshot) {
-              setTimeout(() => {
-                container.scrollTo({ top: matchingScreenshot.offsetTop, behavior: 'smooth' });
-              }, 100);
+              if (container.scrollHeight > container.clientHeight) {
+                 setTimeout(() => {
+                   matchingScreenshot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                 }, 100);
+              }
             }
           }
         } else {
           container.innerHTML = `<div class="text-sm text-gray-500">No screenshots available</div>`;
-          container.classList.remove('hidden');
         }
-      }
-    }
-
-  } catch (err) {
-    console.error('Error loading timeline:', err);
-  }
-}
-
-async function loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers) {
-  try {
-
-    const response = await fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ VideoId: videoId, PartNumbers: partNumbers })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to load screenshots');
-    }
-
-    const screenshots = await response.json();
-
-    const screenshotsByPart = screenshots.reduce((acc, screenshot) => {
-      if (!acc[screenshot.partNumber]) {
-        acc[screenshot.partNumber] = [];
-      }
-      acc[screenshot.partNumber].push(screenshot);
-      return acc;
-    }, {});
-    console.log(screenshotsByPart)
-    for (const partNumber in screenshotsByPart) {
-      const container = transcriptContent.querySelector(`[data-part="${partNumber}"] .screenshot-container`);
-      if (container) {
-        const transcriptGroup = container.closest('.transcript-group');
-        let maxHeight = transcriptGroup.clientHeight - 10;
-        container.style.maxHeight = maxHeight + 'px';
-      
-        await loadScreenshotsTimeline(videoId, container);
-        if (container.scrollHeight > maxHeight) {
-          const sortedScreenshots = screenshotsByPart[partNumber].sort(
-            (a, b) => a.timestampSeconds - b.timestampSeconds
-          );
-          if (sortedScreenshots.length > 0) {
-            const firstTranscriptTimestamp = parseInt(container.dataset.firstTimestamp, 10) || 0;
-            let closestScreenshotIndex = 0;
-            let minTimeDiff = Infinity;
-            sortedScreenshots.forEach((screenshot, index) => {
-              const timeDiff = Math.abs(screenshot.timestampSeconds - firstTranscriptTimestamp);
-              if (timeDiff < minTimeDiff) {
-                minTimeDiff = timeDiff;
-                closestScreenshotIndex = index;
-              }
-            });
-            if (closestScreenshotIndex > 0) {
-              const matchingScreenshot = container.querySelectorAll('.screenshot-item')[closestScreenshotIndex];
-              if (matchingScreenshot) {
-                setTimeout(() => {
-                  container.scrollTo({ top: matchingScreenshot.offsetTop, behavior: 'smooth' });
-                }, 100);
-              }
-            }
-          }
-        } 
       }
     }
   } catch (error) {
@@ -244,13 +165,12 @@ export async function loadVideoTranscripts(videoGroup) {
   const transcriptContainer = videoGroup.nextElementSibling;
   const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
   const transcriptContent = transcriptContainer.querySelector('.transcript-content');
-  const screenshotsTimeline = transcriptContainer.querySelector('.screenshots-timeline');
-
-  screenshotsTimeline.classList.add('hidden');
 
   const videoId = videoGroup.dataset.videoId;
   const searchTerms = decodeURIComponent(videoGroup.dataset.searchTerms);
   const thumbnailUrl = videoGroup.querySelector('img').src;
+  const timelineToggleInput = document.getElementById('timelineToggleInput');
+  const isTimelineEnabled = timelineToggleInput && timelineToggleInput.checked;
 
   try {
     loadingSpinner.classList.remove('hidden');
@@ -315,7 +235,7 @@ export async function loadVideoTranscripts(videoGroup) {
       .map(([part, group]) => {
         const firstTranscriptTimestamp = group.transcripts[0]?.timestampSeconds || 0;
 
-        const placeholderHtml = Array(3).fill()
+        const placeholderHtml = Array(6).fill() 
           .map((_, i) => `
           <div class="mb-1 screenshot-item placeholder">
             <div class="relative">
@@ -331,13 +251,15 @@ export async function loadVideoTranscripts(videoGroup) {
           </div>
         `).join('');
 
+        const screenshotContainerVisibilityClass = isTimelineEnabled ? '' : 'hidden';
+
         return `
         <div class="transcript-group mb-4 border-b pb-4" data-part="${part}">
           <div class="flex flex-col md:flex-row gap-4">
-            <div class="screenshot-container hidden md:w-1/6 lg:w-1/6 overflow-y-auto overflow-x-hidden scrollbar-hide" ce-nowrap md:whitespace-normal overflow-y-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide" 
+            <div class="screenshot-container ${screenshotContainerVisibilityClass} md:w-1/6 lg:w-1/6 overflow-y-auto overflow-x-hidden scrollbar-hide" 
                  id="screenshot-part-${part}" style="max-height: 450px"
                  data-first-timestamp="${firstTranscriptTimestamp}">
-              ${placeholderHtml}
+              ${isTimelineEnabled ? placeholderHtml : '<div class="text-sm text-gray-500">Timeline disabled</div>'}
             </div>
             <div class="flex-1 flex gap-4">
               <div class="transcript-content w-1/2">
@@ -365,15 +287,13 @@ export async function loadVideoTranscripts(videoGroup) {
         </div>
       `;
       }).join('');
- const timelineToggleInput = document.getElementById('timelineToggleInput');
-  if (timelineToggleInput && timelineToggleInput.checked) {
+
+  if (isTimelineEnabled) {
     try {
       await loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers);
     } catch (screenshotError) {
       console.error('Error loading screenshots:', screenshotError);
     }
-  } else {
-    screenshotsTimeline.classList.add('hidden');
   }
   
 } catch (error) {
@@ -716,6 +636,8 @@ export function setupSearch(config) {
 
         const groupElement = document.createElement('div');
         groupElement.classList.add('bg-white', 'rounded-lg', 'p-4', 'my-4', 'shadow-lg');
+        groupElement.style.opacity = '0';
+        groupElement.style.transform = 'translateY(20px)';
         groupElement.innerHTML = `
           <div class="cursor-pointer video-group" 
                data-video-id="${videoId}" 
@@ -737,7 +659,7 @@ export function setupSearch(config) {
         `;
         resultsContainer.appendChild(groupElement);
 
-        inView(groupElement, () => {
+        const animateIn = () => {
           animate(
             groupElement,
             {
@@ -749,8 +671,15 @@ export function setupSearch(config) {
               easing: 'ease-out'
             }
           );
+        };
+        inView(groupElement, () => {
+          animateIn();
           return false;
         });
+        const rect = groupElement.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          animateIn();
+        }
 
         const videoGroup = groupElement.querySelector('.video-group');
 
