@@ -231,11 +231,12 @@ export async function loadVideoTranscripts(videoGroup) {
       return text;
     };
 
-    transcriptContent.innerHTML = Object.entries(groupedResults)
+  transcriptContent.innerHTML = Object.entries(groupedResults)
       .map(([part, group]) => {
         const firstTranscriptTimestamp = group.transcripts[0]?.timestampSeconds || 0;
+        const hasScreenShots = group.transcripts[0]?.hasScreenShots ?? true; // Default to true for backwards compatibility
 
-        const placeholderHtml = Array(6).fill() 
+        const placeholderHtml = hasScreenShots ? Array(6).fill() 
           .map((_, i) => `
           <div class="mb-1 screenshot-item placeholder">
             <div class="relative">
@@ -249,9 +250,9 @@ export async function loadVideoTranscripts(videoGroup) {
               </div>
             </div>
           </div>
-        `).join('');
+        `).join('') : '<div class="text-sm text-gray-500">No screenshots available for this video</div>';
 
-        const screenshotContainerVisibilityClass = isTimelineEnabled ? '' : 'hidden';
+        const screenshotContainerVisibilityClass = (isTimelineEnabled && hasScreenShots) ? '' : 'hidden';
 
         return `
         <div class="transcript-group mb-4 border-b pb-4" data-part="${part}">
@@ -287,10 +288,13 @@ export async function loadVideoTranscripts(videoGroup) {
         </div>
       `;
       }).join('');
-
   if (isTimelineEnabled) {
     try {
-      await loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers);
+      // Check if the first result has screenshots before attempting to load them
+      const firstResult = results[0];
+      if (firstResult?.hasScreenShots ?? true) { // Default to true for backwards compatibility
+        await loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers);
+      }
     } catch (screenshotError) {
       console.error('Error loading screenshots:', screenshotError);
     }
