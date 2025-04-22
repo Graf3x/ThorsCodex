@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../ThorsCodex.API"
+		},
+		{
+			"path": "../ThorsCodexUpdateVideo"
 		}
 	],
 	"settings": {}
