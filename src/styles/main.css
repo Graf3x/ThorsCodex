@@ -281,3 +281,12 @@ main {
     left: -100%;
   }
 }
+
+.loading-bar-container {
+  position: relative;
+  min-height: 24px;
+}
+
+.loading-square {
+  transform-origin: center;
+}

@@ -165,6 +165,7 @@ export async function loadVideoTranscripts(videoGroup) {
   const transcriptContainer = videoGroup.nextElementSibling;
   const loadingSpinner = transcriptContainer.querySelector('.loading-spinner');
   const transcriptContent = transcriptContainer.querySelector('.transcript-content');
+  const loadingSquares = transcriptContainer.querySelectorAll('.loading-square');
 
   const videoId = videoGroup.dataset.videoId;
   const searchTerms = decodeURIComponent(videoGroup.dataset.searchTerms);
@@ -175,6 +176,18 @@ export async function loadVideoTranscripts(videoGroup) {
   try {
     loadingSpinner.classList.remove('hidden');
     transcriptContent.innerHTML = '';
+    
+    // Animate loading squares
+    animate(loadingSquares, 
+      { opacity: [0, 1], scale: [0.8, 1] },
+      { 
+        duration: 0.5,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut",
+        delay: stagger(0.15)
+      }
+    );
 
     const requestBody = {
       videoId: videoId,
@@ -287,24 +300,35 @@ export async function loadVideoTranscripts(videoGroup) {
           </div>
         </div>
       `;
-      }).join('');
-  if (isTimelineEnabled) {
-    try {
-      // Check if the first result has screenshots before attempting to load them
-      const firstResult = results[0];
-      if (firstResult?.hasScreenShots ?? true) { // Default to true for backwards compatibility
-        await loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers);
-      }
-    } catch (screenshotError) {
-      console.error('Error loading screenshots:', screenshotError);
+      }).join('');    // Hide loading indicators after transcript content is loaded
+    loadingSpinner.classList.add('hidden');
+    const loadingBarContainer = transcriptContainer.querySelector('.loading-bar-container');
+    if (loadingBarContainer) {
+      loadingBarContainer.classList.add('hidden');
     }
-  }
+
+    // Load screenshots after hiding loading indicators
+    if (isTimelineEnabled) {
+      try {
+        // Check if the first result has screenshots before attempting to load them
+        const firstResult = results[0];
+        if (firstResult?.hasScreenShots ?? true) { // Default to true for backwards compatibility
+          await loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers);
+        }
+      } catch (screenshotError) {
+        console.error('Error loading screenshots:', screenshotError);
+      }
+    }
   
 } catch (error) {
   console.error('Error loading transcripts:', error);
   transcriptContent.innerHTML = '<p class="text-red-500">Error loading transcripts</p>';
-} finally {
+  // Hide loading indicators in case of error
   loadingSpinner.classList.add('hidden');
+  const loadingBarContainer = transcriptContainer.querySelector('.loading-bar-container');
+  if (loadingBarContainer) {
+    loadingBarContainer.classList.add('hidden');
+  }
 }
 }
 
@@ -656,7 +680,11 @@ export function setupSearch(config) {
             </div>
           </div>
           <div class="hidden mt-4 pl-4 border-l-2 border-gray-200 transcript-container">
-            <div class="screenshots-timeline"></div>
+            <div class="loading-bar-container mb-4 flex gap-2 justify-center">
+              ${Array(5).fill().map((_, i) => `
+                <div class="loading-square w-3 h-3 bg-blue-500 rounded-sm opacity-0" style="--delay: ${i * 0.15}s"></div>
+              `).join('')}
+            </div>
             <div class="loading-spinner hidden"></div>
             <div class="transcript-content"></div>
           </div>
