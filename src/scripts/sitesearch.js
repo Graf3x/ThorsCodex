@@ -73,91 +73,129 @@ export function formatTimestamp(seconds) {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-async function loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers) {
-  try {
-    const response = await fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ VideoId: videoId, PartNumbers: partNumbers })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to load screenshots');
+async function renderScreenshots(screenshots, transcriptContent) {
+  const screenshotsByPart = screenshots.reduce((acc, screenshot) => {
+    if (!acc[screenshot.partNumber]) {
+      acc[screenshot.partNumber] = [];
     }
+    acc[screenshot.partNumber].push(screenshot);
+    return acc;
+  }, {});
 
-    const screenshots = await response.json();
+  for (const partNumber in screenshotsByPart) {
+    const container = transcriptContent.querySelector(`[data-part="${partNumber}"] .screenshot-container`);
+    if (container) {
+      const sortedScreenshots = screenshotsByPart[partNumber].sort(
+        (a, b) => a.timestampSeconds - b.timestampSeconds
+      );
 
-    const screenshotsByPart = screenshots.reduce((acc, screenshot) => {
-      if (!acc[screenshot.partNumber]) {
-        acc[screenshot.partNumber] = [];
-      }
-      acc[screenshot.partNumber].push(screenshot);
-      return acc;
-    }, {});
+      if (sortedScreenshots.length > 0) {
+        const firstTranscriptTimestamp = parseInt(container.dataset.firstTimestamp, 10) || 0;
+        let closestScreenshotIndex = 0;
+        let minTimeDiff = Infinity;
 
-    for (const partNumber in screenshotsByPart) {
-      const container = transcriptContent.querySelector(`[data-part="${partNumber}"] .screenshot-container`);
-      if (container) {
-        const sortedScreenshots = screenshotsByPart[partNumber].sort(
-          (a, b) => a.timestampSeconds - b.timestampSeconds
-        );
+        sortedScreenshots.forEach((screenshot, index) => {
+          const timeDiff = Math.abs(screenshot.timestampSeconds - firstTranscriptTimestamp);
+          if (timeDiff < minTimeDiff) {
+            minTimeDiff = timeDiff;
+            closestScreenshotIndex = index;
+          }
+        });
 
-        if (sortedScreenshots.length > 0) {
-          container.querySelectorAll('.placeholder').forEach(el => el.remove());
-
-          const firstTranscriptTimestamp = parseInt(container.dataset.firstTimestamp, 10) || 0;
-
-          let closestScreenshotIndex = 0;
-          let minTimeDiff = Infinity;
-
-          sortedScreenshots.forEach((screenshot, index) => {
-            const timeDiff = Math.abs(screenshot.timestampSeconds - firstTranscriptTimestamp);
-            if (timeDiff < minTimeDiff) {
-              minTimeDiff = timeDiff;
-              closestScreenshotIndex = index;
-            }
-          });
-
-          const screenshotsHtml = sortedScreenshots.map((screenshot, index) => `
-            <div class="mb-1 screenshot-item inline-block md:block md:mr-0 flex-shrink-0 w-28 md:w-auto ${index === closestScreenshotIndex ? 'border-l-4 border-blue-500' : ''}">
-              <div class="relative">
-                <a href="https://www.youtube.com/watch?v=${videoId}&t=${screenshot.timestampSeconds}s" target="_blank">
-                  <img 
-                    src="data:image/png;base64,${screenshot.imageData}" 
-                    alt="Screenshot at ${formatTimestamp(screenshot.timestampSeconds)}"
-                    class="rounded-md border border-gray-300 w-full h-auto"
-                  />
-               </a>
-                <div class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-md">
-                  ${formatTimestamp(screenshot.timestampSeconds)}
-                </div>
+        sortedScreenshots.forEach((screenshot, index) => {
+          const screenshotElement = document.createElement('div');
+          screenshotElement.className = `mb-1 screenshot-item inline-block md:block md:mr-0 flex-shrink-0 w-28 md:w-auto opacity-0 ${index === closestScreenshotIndex ? 'border-l-4 border-blue-500' : ''}`;
+          screenshotElement.innerHTML = `
+            <div class="relative">
+              <a href="https://www.youtube.com/watch?v=${screenshot.videoId}&t=${screenshot.timestampSeconds}s" target="_blank">
+                <img 
+                  src="data:image/png;base64,${screenshot.imageData}" 
+                  alt="Screenshot at ${formatTimestamp(screenshot.timestampSeconds)}"
+                  class="rounded-md border border-gray-300 w-full h-auto"
+                />
+              </a>
+              <div class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-md">
+                ${formatTimestamp(screenshot.timestampSeconds)}
               </div>
             </div>
-          `).join('');
+          `;
 
-          container.innerHTML = screenshotsHtml;
-
-          const transcriptGroup = container.closest('.transcript-group');
-          let maxHeight = transcriptGroup.clientHeight - 10;
-          container.style.maxHeight = maxHeight + 'px';
-
-          if (closestScreenshotIndex > 0) {
-            const matchingScreenshot = container.querySelectorAll('.screenshot-item')[closestScreenshotIndex];
-            if (matchingScreenshot) {
-              if (container.scrollHeight > container.clientHeight) {
-                 setTimeout(() => {
-                   matchingScreenshot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-                 }, 100);
-              }
-            }
+          const placeholder = container.querySelector('.placeholder');
+          if (placeholder) {
+            placeholder.replaceWith(screenshotElement);
+          } else {
+            container.appendChild(screenshotElement);
           }
-        } else {
-          container.innerHTML = `<div class="text-sm text-gray-500">No screenshots available</div>`;
+
+          requestAnimationFrame(() => {
+            animate(screenshotElement, 
+              { opacity: [0, 1], scale: [0.95, 1] },
+              { duration: 0.3, ease: "easeOut" }
+            );
+          });
+        });
+
+        container.querySelectorAll('.placeholder').forEach(el => el.remove());
+
+        const transcriptGroup = container.closest('.transcript-group');
+        let maxHeight = transcriptGroup.clientHeight - 10;
+        container.style.maxHeight = maxHeight + 'px';
+
+        if (closestScreenshotIndex > 0) {
+          const matchingScreenshot = container.querySelectorAll('.screenshot-item')[closestScreenshotIndex];
+          if (matchingScreenshot && container.scrollHeight > container.clientHeight) {
+            setTimeout(() => {
+              matchingScreenshot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }, 100);
+          }
         }
+      } else {
+        container.innerHTML = `<div class="text-sm text-gray-500">No screenshots available</div>`;
       }
+    }
+  }
+}
+
+async function loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers) {
+  try {
+
+    const sortedPartNumbers = [...partNumbers].sort((a, b) => a - b);
+    const firstPart = sortedPartNumbers[0];
+    const remainingParts = sortedPartNumbers.slice(1);
+
+ 
+    const firstPartResponse = await fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ VideoId: videoId, PartNumbers: [firstPart] })
+    });
+
+    if (!firstPartResponse.ok) {
+      throw new Error('Failed to load screenshots for first part');
+    }
+
+  
+    const remainingPartsPromise = remainingParts.length > 0 ? fetch(`${apiConfig.baseUrl}/GetScreenshotsByVideoIdAndPartNumbers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ VideoId: videoId, PartNumbers: remainingParts })
+    }) : Promise.resolve(null);
+
+  
+    const firstPartScreenshots = await firstPartResponse.json();
+    await renderScreenshots(firstPartScreenshots, transcriptContent);
+
+    const remainingResponse = await remainingPartsPromise;
+    if (remainingResponse && remainingResponse.ok) {
+      const remainingScreenshots = await remainingResponse.json();
+      await renderScreenshots(remainingScreenshots, transcriptContent);
     }
   } catch (error) {
     console.error('Error loading screenshots:', error);
+    const containers = transcriptContent.querySelectorAll('.screenshot-container');
+    containers.forEach(container => {
+      container.innerHTML = `<div class="text-sm text-red-500">Failed to load screenshots</div>`;
+    });
   }
 }
 
@@ -177,7 +215,6 @@ export async function loadVideoTranscripts(videoGroup) {
     loadingSpinner.classList.remove('hidden');
     transcriptContent.innerHTML = '';
     
-    // Animate loading squares
     animate(loadingSquares, 
       { opacity: [0, 1], scale: [0.8, 1] },
       { 
@@ -300,19 +337,17 @@ export async function loadVideoTranscripts(videoGroup) {
           </div>
         </div>
       `;
-      }).join('');    // Hide loading indicators after transcript content is loaded
+      }).join('');  
     loadingSpinner.classList.add('hidden');
     const loadingBarContainer = transcriptContainer.querySelector('.loading-bar-container');
     if (loadingBarContainer) {
       loadingBarContainer.classList.add('hidden');
     }
 
-    // Load screenshots after hiding loading indicators
     if (isTimelineEnabled) {
       try {
-        // Check if the first result has screenshots before attempting to load them
         const firstResult = results[0];
-        if (firstResult?.hasScreenShots ?? true) { // Default to true for backwards compatibility
+        if (firstResult?.hasScreenShots ?? true) { 
           await loadScreenshotsForTranscript(videoId, transcriptContent, partNumbers);
         }
       } catch (screenshotError) {
@@ -323,7 +358,6 @@ export async function loadVideoTranscripts(videoGroup) {
 } catch (error) {
   console.error('Error loading transcripts:', error);
   transcriptContent.innerHTML = '<p class="text-red-500">Error loading transcripts</p>';
-  // Hide loading indicators in case of error
   loadingSpinner.classList.add('hidden');
   const loadingBarContainer = transcriptContainer.querySelector('.loading-bar-container');
   if (loadingBarContainer) {
